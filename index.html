@@ -1,0 +1,212 @@
+<!doctype html>
+<!-- Single file, no build, no framework. Songs = iTunes Search API 30s previews (free, no key) via JSONP to dodge CORS. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guess the Song</title>
+<style>
+  :root { --bg:#0f0f17; --card:#1b1b28; --fg:#eee; --mute:#888; --acc:#7c5cff; --ok:#2ecc71; --bad:#e74c3c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px system-ui,sans-serif; background:var(--bg); color:var(--fg); display:grid; place-items:center; min-height:100vh; padding:16px; }
+  main { width:100%; max-width:520px; background:var(--card); border-radius:16px; padding:24px; }
+  h1 { margin:0 0 16px; text-align:center; }
+  label { display:block; margin:10px 0 4px; color:var(--mute); font-size:14px; }
+  input, select, button { width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#111; color:var(--fg); font:inherit; }
+  button { background:var(--acc); border:0; cursor:pointer; margin-top:10px; font-weight:600; }
+  button:disabled { opacity:.4; cursor:default; }
+  button.alt { background:#333; }
+  .row { display:flex; gap:8px; } .row > * { flex:1; }
+  .bar { display:flex; gap:4px; margin:16px 0; } .bar div { flex:1; height:8px; border-radius:4px; background:#333; }
+  .bar .on { background:var(--acc); } .bar .miss { background:var(--bad); }
+  .stats { display:flex; justify-content:space-between; color:var(--mute); font-size:14px; }
+  .big { font-size:48px; text-align:center; margin:8px 0; }
+  #choices button { background:#2a2a3d; text-align:left; } #choices button.bad { background:var(--bad); } #choices button.good { background:var(--ok); }
+  #reveal img { width:120px; border-radius:8px; display:block; margin:0 auto 8px; }
+  #reveal, .center { text-align:center; }
+  #log { color:var(--mute); font-size:14px; min-height:20px; margin-top:8px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🎵 Guess the Song</h1>
+
+  <section id="setup">
+    <label>Artist only (optional)</label>
+    <input id="artist" placeholder="e.g. Queen">
+    <label>Genre only (optional)</label>
+    <select id="genre">
+      <option value="">Any</option>
+      <option>Pop</option><option>Rock</option><option>Hip-Hop/Rap</option><option>R&B/Soul</option>
+      <option>Dance</option><option>Electronic</option><option>Country</option><option>Alternative</option>
+      <option>Metal</option><option>Jazz</option><option>K-Pop</option><option>Latin</option><option>Reggae</option><option>Classical</option>
+    </select>
+    <div class="row">
+      <div><label>Decade</label>
+        <select id="decade"><option value="">Any</option><option>1960</option><option>1970</option><option>1980</option><option>1990</option><option>2000</option><option>2010</option><option>2020</option></select></div>
+      <div><label>Rounds</label>
+        <select id="rounds"><option>5</option><option selected>10</option><option>20</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>Mode</label>
+        <select id="mode"><option value="type">Type answer</option><option value="mc">Multiple choice</option></select></div>
+      <div><label>Clip start</label>
+        <select id="start"><option value="0">Beginning</option><option value="rand">Random spot</option></select></div>
+    </div>
+    <button id="go">Start</button>
+    <div id="log"></div>
+  </section>
+
+  <section id="game" hidden>
+    <div class="stats"><span id="roundTxt"></span><span id="streakTxt"></span><span id="scoreTxt"></span></div>
+    <div class="bar" id="bar"></div>
+    <div class="big" id="clipTxt"></div>
+    <div class="row"><button id="play">▶ Play clip</button><button id="skip" class="alt">Skip (+time)</button></div>
+    <div id="typeBox">
+      <input id="guess" list="titles" placeholder="Song title…" autocomplete="off">
+      <datalist id="titles"></datalist>
+      <button id="submit">Guess</button>
+    </div>
+    <div id="choices"></div>
+    <div id="reveal" hidden></div>
+  </section>
+
+  <section id="end" class="center" hidden>
+    <p>Final score</p>
+    <div class="big" id="final"></div>
+    <p id="best"></p>
+    <button id="again">Play again</button>
+  </section>
+</main>
+<audio id="audio" preload="auto"></audio>
+
+<script>
+const CLIPS = [0.1, 0.5, 1, 2, 3, 5];          // seconds per attempt
+const POINTS = [1000, 800, 600, 400, 250, 100];
+const RANDOM_TERMS = ['love','night','baby','heart','dance','fire','summer','girl','dream','money','home','light','party','rain','forever'];
+const $ = id => document.getElementById(id);
+const audio = $('audio');
+let pool = [], queue = [], song, step, score, streak, round, total, timer, offset, opts;
+
+// JSONP: iTunes search CORS is unreliable, script tag always works.
+function itunes(params) {
+  return new Promise((ok, fail) => {
+    const cb = 'cb' + Math.random().toString(36).slice(2), s = document.createElement('script');
+    window[cb] = d => { delete window[cb]; s.remove(); ok(d.results); };
+    s.onerror = () => { delete window[cb]; s.remove(); fail(new Error('Network error')); };
+    s.src = 'https://itunes.apple.com/search?' + new URLSearchParams({ media:'music', entity:'song', limit:200, callback:cb, ...params });
+    document.head.append(s);
+  });
+}
+
+const norm = s => s.toLowerCase().replace(/\s*[([].*?[)\]]/g, '').replace(/\s-\s.*$/, '').replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+console.assert(norm('Don\'t Stop Me Now (Remastered 2011)') === norm('dont stop me now'), 'norm strips parens/punct');
+console.assert(norm('Hello - Radio Edit') === 'hello', 'norm strips " - suffix"');
+const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(v => v[1]);
+
+async function buildPool() {
+  const artist = $('artist').value.trim(), genre = $('genre').value, decade = +$('decade').value;
+  let res;
+  if (artist) res = (await itunes({ term:artist, attribute:'artistTerm' })).filter(t => t.artistName.toLowerCase().includes(artist.toLowerCase()));
+  else if (genre) res = (await Promise.all([genre, genre + ' hits'].map(term => itunes({ term })))).flat();
+  else res = (await Promise.all(shuffle(RANDOM_TERMS).slice(0, 3).map(term => itunes({ term })))).flat();
+  if (genre) res = res.filter(t => (t.primaryGenreName || '').toLowerCase().includes(genre.toLowerCase().split(/[/&]/)[0]));
+  if (decade) res = res.filter(t => { const y = +t.releaseDate?.slice(0, 4); return y >= decade && y < decade + 10; });
+  const seen = new Set();
+  return res.filter(t => t.previewUrl && !seen.has(norm(t.trackName)) && seen.add(norm(t.trackName)));
+}
+
+$('go').onclick = async () => {
+  $('go').disabled = true; $('log').textContent = 'Loading songs…';
+  try { pool = await buildPool(); } catch (e) { pool = []; }
+  $('go').disabled = false;
+  if (pool.length < 4) return $('log').textContent = 'Not enough songs found. Try looser filters.';
+  $('log').textContent = '';
+  opts = { mode:$('mode').value, start:$('start').value };
+  total = Math.min(+$('rounds').value, pool.length);
+  queue = shuffle(pool).slice(0, total);
+  $('titles').replaceChildren(...pool.map(t => new Option('', t.trackName)));
+  score = streak = round = 0;
+  show('game'); next();
+};
+
+function show(id) { for (const s of ['setup', 'game', 'end']) $(s).hidden = s !== id; }
+
+function next() {
+  audio.pause();
+  if (round === total) return finish();
+  song = queue[round++]; step = 0;
+  offset = opts.start === 'rand' ? Math.random() * 20 : 0; // previews are ~30s
+  audio.src = song.previewUrl;
+  $('guess').value = ''; $('reveal').hidden = true;
+  $('typeBox').hidden = opts.mode !== 'type'; $('play').parentNode.hidden = false;
+  if (opts.mode === 'mc') {
+    const opts4 = shuffle([song, ...shuffle(pool.filter(t => t !== song)).slice(0, 3)]);
+    $('choices').innerHTML = '';
+    for (const t of opts4) {
+      const b = document.createElement('button');
+      b.textContent = `${t.trackName} — ${t.artistName}`;
+      b.song = t;
+      b.onclick = () => guess(t === song, b);
+      $('choices').append(b);
+    }
+  } else $('choices').innerHTML = '';
+  draw();
+}
+
+function draw() {
+  $('roundTxt').textContent = `Round ${round}/${total}`;
+  $('streakTxt').textContent = streak > 1 ? `🔥 ${streak}` : '';
+  $('scoreTxt').textContent = `${score} pts`;
+  $('clipTxt').textContent = `${CLIPS[step]}s · ${POINTS[step]} pts`;
+  $('bar').innerHTML = CLIPS.map((_, i) => `<div class="${i < step ? 'miss' : i === step ? 'on' : ''}"></div>`).join('');
+}
+
+$('play').onclick = () => {
+  clearTimeout(timer);
+  audio.currentTime = offset;
+  audio.play().catch(() => {});
+  timer = setTimeout(() => audio.pause(), CLIPS[step] * 1000);
+};
+
+$('submit').onclick = () => { const g = $('guess').value.trim(); if (g) guess(norm(g) === norm(song.trackName)); };
+$('guess').onkeydown = e => e.key === 'Enter' && $('submit').click();
+$('skip').onclick = () => guess(false);
+
+function guess(right, btn) {
+  if (right) {
+    const pts = POINTS[step] + streak * 50; // streak bonus
+    score += pts; streak++;
+    return reveal(`✅ +${pts}`);
+  }
+  if (btn) { btn.classList.add('bad'); btn.disabled = true; }
+  $('guess').value = '';
+  if (++step === CLIPS.length) { streak = 0; return reveal('❌ Out of tries'); }
+  draw();
+}
+
+function reveal(msg) {
+  clearTimeout(timer);
+  for (const b of $('choices').children) { b.disabled = true; if (b.song === song) b.classList.add('good'); }
+  $('typeBox').hidden = $('play').parentNode.hidden = true;
+  $('reveal').hidden = false;
+  $('reveal').innerHTML = `<p>${msg}</p><img src="${song.artworkUrl100}" alt=""><b></b><br><span></span><button id="nextBtn">${round === total ? 'Results' : 'Next'}</button>`;
+  $('reveal').querySelector('b').textContent = song.trackName;        // textContent: API strings not trusted as HTML
+  $('reveal').querySelector('span').textContent = song.artistName;
+  $('nextBtn').onclick = next;
+  draw(); $('clipTxt').textContent = '';
+  audio.currentTime = offset; audio.play().catch(() => {}); // play the answer
+}
+
+function finish() {
+  show('end');
+  $('final').textContent = score;
+  let best = 0;
+  try { best = Math.max(score, +localStorage.getItem('gts-best') || 0); localStorage.setItem('gts-best', best); } catch {}
+  $('best').textContent = `Best: ${best}`;
+}
+$('again').onclick = () => show('setup');
+</script>
+</body>
+</html>
