@@ -167,6 +167,11 @@
   .trk { display:flex; gap:12px; align-items:center; } .trk img { width:40px; height:40px; border-radius:4px; } .trk small { display:block; color:var(--mute); }
   tr.missed .trk b { color:var(--mute); }
 
+  .tbl { overflow-x:auto; }
+  .lbsub { display:flex; gap:8px; margin-top:20px; max-width:520px; }
+  #lbMsg { margin-top:10px; min-height:20px; }
+  tr.me td { background:#1d3a28; color:var(--acc); }
+  .medal { font-size:18px; }
   .center { display:grid; place-items:center; align-content:center; min-height:100%; gap:16px; color:var(--mute); }
   .spin { width:48px; height:48px; border:4px solid #333; border-top-color:var(--acc); border-radius:50%; animation:spin .8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
@@ -184,7 +189,8 @@
     .daily { flex-direction:column; align-items:flex-start; }
     .bar { grid-template-columns:1fr auto; height:64px; } .right, .prog { display:none; }
     #choices { grid-template-columns:1fr; } .seg span { font-size:10px; }
-    .guess { flex-wrap:wrap; } .guess .ac { flex-basis:100%; }
+    .guess, .lbsub { flex-wrap:wrap; } .guess .ac { flex-basis:100%; }
+    .pctrl { gap:20px; } .stage h1 { font-size:26px; }
   }
   @media (max-width:480px) { .nav span { display:none; } .grid { grid-template-columns:repeat(2,1fr); } }
 </style>
@@ -197,6 +203,7 @@
       <nav>
         <button class="nav on" data-go="home" data-icon="home"><span>Home</span></button>
         <button class="nav" data-go="custom" data-icon="tune"><span>Custom game</span></button>
+        <button class="nav" data-go="board" data-icon="trophy"><span>Leaderboard</span></button>
         <button class="nav" data-go="stats" data-icon="stats"><span>Your stats</span></button>
       </nav>
     </div>
@@ -269,12 +276,26 @@
         <div class="label" id="eLabel"></div>
         <div class="score" id="final"></div>
         <div class="sub" id="eSub"></div>
-        <div class="actions"><button class="cta" id="again">Play again</button><button class="ghost" id="share">Share result</button><button class="ghost" data-go="home">Home</button></div>
+        <div class="actions"><button class="cta" id="again">Play again</button><button class="ghost" id="share">Share result</button><button class="ghost" id="challenge">Challenge a friend</button><button class="ghost" data-go="home">Home</button></div>
+        <form class="lbsub" id="lbForm" hidden>
+          <input id="lbName" placeholder="Your name for the leaderboard" maxlength="20" autocomplete="nickname" aria-label="Your name" required>
+          <button class="cta" id="lbSend">Submit score</button>
+        </form>
+        <div class="sub" id="lbMsg"></div>
       </div>
       <div class="body">
         <div class="tiles" id="eTiles"></div>
         <h2>Tracklist</h2>
-        <table><thead><tr><th>#</th><th>Title</th><th>Heard</th><th>Points</th></tr></thead><tbody id="tracks"></tbody></table>
+        <div class="tbl"><table><thead><tr><th>#</th><th>Title</th><th>Heard</th><th>Points</th></tr></thead><tbody id="tracks"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="board" hidden>
+      <div class="head" style="--tint:#7a5a10"><div class="label">Online</div><h1>Leaderboard</h1><div class="sub" id="lbInfo">Top 50 scores. Finish a game to submit yours.</div></div>
+      <div class="body">
+        <div class="chips" id="lbTabs"></div>
+        <div class="chips" id="lbModes" style="margin-top:8px"></div>
+        <div class="tbl" style="margin-top:16px"><table><thead><tr><th>#</th><th>Player</th><th>Playlist</th><th>Correct</th><th>Score</th></tr></thead><tbody id="lbRows"></tbody></table></div>
       </div>
     </section>
 
@@ -283,7 +304,7 @@
       <div class="body">
         <div class="tiles" id="sTiles"></div>
         <h2>Recent games</h2>
-        <table><thead><tr><th>#</th><th>Playlist</th><th>Date</th><th>Correct</th><th>Score</th></tr></thead><tbody id="sGames"></tbody></table>
+        <div class="tbl"><table><thead><tr><th>#</th><th>Playlist</th><th>Date</th><th>Correct</th><th>Score</th></tr></thead><tbody id="sGames"></tbody></table></div>
         <div class="actions"><button class="ghost" id="reset">Reset stats</button></div>
       </div>
     </section>
@@ -306,6 +327,10 @@
 <audio id="audio" preload="auto"></audio>
 
 <script>
+// Online leaderboard (optional): paste your Supabase project URL + publishable/anon key. See README.md.
+// The key is public by design; the table's RLS + CHECK constraints are what protect it.
+const SUPABASE_URL = '';
+const SUPABASE_KEY = '';
 const CLIPS  = [0.1, 0.5, 1, 2, 4, 7, 10, 15];        // seconds unlocked per attempt
 const POINTS = [1000, 850, 700, 550, 400, 300, 200, 100];
 const MAX = CLIPS.at(-1);
@@ -335,6 +360,7 @@ const ICONS = {
   bulb:'M9 21h6v-2H9zm3-20a7 7 0 0 0-4 12.7V17h8v-3.3A7 7 0 0 0 12 1z',
   vol:'M3 9v6h4l5 5V4L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z',
   mic:'M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z',
+  trophy:'M19 5h-2V3H7v2H5a2 2 0 0 0-2 2v1a4 4 0 0 0 3.6 4A5 5 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5 5 0 0 0 4.4-3.9A4 4 0 0 0 21 8V7a2 2 0 0 0-2-2zM5 8V7h2v3a2 2 0 0 1-2-2zm14 0a2 2 0 0 1-2 2V7h2z',
   note:'M12 3v10.6A4 4 0 1 0 14 17V7h4V3z',
 };
 const icon = (n, s = 20) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="currentColor" aria-hidden="true"><path d="${ICONS[n]}"/></svg>`;
@@ -388,10 +414,18 @@ function jsonp(url, params) {
     document.head.append(s);
   });
 }
-const itunes = p => jsonp('https://itunes.apple.com/search', { media:'music', entity:'song', limit:200, ...p }).then(d => d.results);
+// Keep API traffic low: identical requests are shared for the session, home-page art is cached 7 days.
+const memo = new Map();
+const once = (key, fn) => { if (!memo.has(key)) memo.set(key, fn().catch(e => { memo.delete(key); throw e; })); return memo.get(key); };
+const cached = (key, fn, ttl = 7 * 864e5) => {
+  const hit = store.get(key, null);
+  if (hit && Date.now() - hit.t < ttl) return Promise.resolve(hit.v);
+  return fn().then(v => { store.set(key, { t:Date.now(), v }); return v; });
+};
+const itunes = p => once('it' + JSON.stringify(p), () => jsonp('https://itunes.apple.com/search', { media:'music', entity:'song', limit:200, ...p }).then(d => d.results));
 // Deezer only for artist photos/suggestions (iTunes has no artist images); iTunes is the fallback.
 const deezer = (path, p) => jsonp('https://api.deezer.com/' + path, { output:'jsonp', ...p }).then(d => d.error ? Promise.reject(d.error) : d.data);
-const artistPic = name => deezer('search/artist', { q:name, limit:1 }).then(d => d[0]?.picture_big);
+const artistPic = name => cached('gts-pic-' + name, () => deezer('search/artist', { q:name, limit:1 }).then(d => d[0]?.picture_big || ''));
 
 // ---------- autocomplete (artist search + guess box) ----------
 function autocomplete(input, source, onPick, ico) {
@@ -441,7 +475,7 @@ const artistSource = async q => {
 const titleSource = async q => { const n = norm(q); return n ? rank(G.pool.filter(t => norm(t.trackName).includes(n)).map(t => ({ label:t.trackName, img:t.artworkUrl60 || t.artworkUrl100 })), q).slice(0, 7) : []; };
 
 // ---------- navigation ----------
-const VIEWS = ['home', 'custom', 'loading', 'game', 'end', 'stats'];
+const VIEWS = ['home', 'custom', 'loading', 'game', 'end', 'board', 'stats'];
 function show(v) {
   for (const s of VIEWS) $(s).hidden = s !== v;
   document.querySelectorAll('.nav').forEach(n => n.classList.toggle('on', n.dataset.go === v));
@@ -450,6 +484,7 @@ function show(v) {
   $('toast').classList.remove('show');
   if (v === 'home') renderHome();
   if (v === 'stats') renderStats();
+  if (v === 'board') renderBoard();
 }
 const leaveOk = () => !G || G.over || confirm('Quit this game? Your progress will be lost.');
 function go(v) { if (!leaveOk()) return; loadSeq++; stop(); G = null; show(v); }
@@ -474,7 +509,7 @@ function card(title, sub, onClick, round, imgs) {
   c.onclick = onClick; c.onkeydown = e => e.key === 'Enter' && onClick();
   return c;
 }
-const coverArt = term => itunes({ term, limit:8 }).then(r => [...new Set(r.map(t => t.artworkUrl100.replace('100x100', '200x200')))]);
+const coverArt = term => cached('gts-cov-' + term, () => itunes({ term, limit:8 }).then(r => [...new Set(r.map(t => t.artworkUrl100.replace('100x100', '200x200')))]));
 $('quick').append(...QUICK.map(([name, desc, cfg]) => card(name, desc, () => startGame(mkCfg({ ...cfg, label:name, from:'home' })), false,
   coverArt(cfg.decade ? cfg.decade + 's hits' : cfg.genre ? cfg.genre + ' hits' : 'top hits'))));
 $('artists').append(...ARTISTS.map(a => card(a, 'Artist', () => startGame(mkCfg({ artist:a, label:a, from:'home' })), true, artistPic(a).then(u => [u]))));
@@ -522,7 +557,7 @@ function renderRecent() {
     if (g.art) sq.append(Object.assign(new Image(), { src:g.art, alt:'', style:'width:100%;height:100%;object-fit:cover' }));
     d.append(make('b', '', g.label), make('small', '', `${g.score} pts · ${g.correct}/${g.total} correct`));
     b.append(sq, d);
-    b.onclick = () => leaveOk() && startGame({ ...g.cfg, from:'home' });
+    b.onclick = () => leaveOk() && startGame({ ...g.cfg, seed:undefined, challenge:false, from:'home' });
     return b;
   }));
 }
@@ -560,13 +595,15 @@ async function buildPool(cfg, r) {
 async function startGame(cfg) {
   const my = ++loadSeq;
   stop(); G = null; show('loading');
-  const r = cfg.daily ? rng(hash(cfg.daily)) : Math.random; // daily = same songs for the same date
+  cfg.seed ??= Math.floor(Math.random() * 2 ** 31);
+  const r = rng(cfg.daily ? hash(cfg.daily) : cfg.seed); // same seed (daily date / challenge link) = same songs
   let pool = [];
   try { pool = await buildPool(cfg, r); } catch {}
   if (my !== loadSeq) return; // user navigated away while loading
   if (pool.length < 4) { toast(pool.length ? 'Not enough songs — try looser filters' : 'No songs found (or no connection)'); return show(cfg.from || 'home'); }
   const total = Math.min(cfg.rounds, pool.length);
-  G = { cfg, pool, total, queue:shuffle(pool, r).slice(0, total), round:0, score:0, streak:0, bestStreak:0, history:[] };
+  const queue = shuffle(pool, r).slice(0, total);
+  G = { cfg, pool, total, queue, offsets:queue.map(() => cfg.start === 'rand' ? r() * (28 - MAX) : 0), round:0, score:0, streak:0, bestStreak:0, history:[] };
   show('game'); next();
 }
 
@@ -577,7 +614,7 @@ function next() {
   stop();
   if (G.round === G.total) return finish();
   song = G.queue[G.round++]; step = 0; hinted = done = won = false; attempts = [];
-  offset = G.cfg.start === 'rand' ? Math.random() * (28 - MAX) : 0; // previews ~30s, keep 15s window inside
+  offset = G.offsets[G.round - 1]; // previews ~30s, random window stays inside
   audio.src = song.previewUrl;
   const nxt = G.queue[G.round]; if (nxt) Object.assign(new Audio(), { preload:'auto', src:nxt.previewUrl }); // warm cache
   document.body.style.setProperty('--hue', Math.floor(Math.random() * 360));
@@ -621,11 +658,12 @@ function draw() {
 }
 
 // rAF stop check: tighter than setTimeout for the 0.1s clip
+let playSeq = 0;
 function play(len) {
   stop();
-  const scale = done ? 30 : MAX;
-  audio.currentTime = offset;
-  audio.play().catch(stop);
+  const scale = done ? 30 : MAX, my = playSeq;
+  const start = () => { if (my !== playSeq) return; audio.currentTime = offset; audio.play().catch(stop); };
+  audio.readyState >= 1 ? start() : audio.addEventListener('loadedmetadata', start, { once:true }); // seeking before metadata is ignored on iOS
   setPlaying(true);
   const tick = () => {
     const t = Math.max(0, audio.currentTime - offset);
@@ -636,7 +674,7 @@ function play(len) {
   };
   raf = requestAnimationFrame(tick);
 }
-function stop() { cancelAnimationFrame(raf); audio.pause(); setPlaying(false); }
+function stop() { playSeq++; cancelAnimationFrame(raf); audio.pause(); setPlaying(false); }
 function setPlaying(on) {
   document.body.classList.toggle('playing', on);
   $('play').innerHTML = icon(on ? 'pause' : 'play', 18);
@@ -683,6 +721,7 @@ function reveal(w, pts, msg) {
   $('nextBtn').textContent = G.round === G.total ? 'See results' : 'Next song';
   $('nextBtn').hidden = false;
   draw();
+  requestAnimationFrame(() => $('nextBtn').scrollIntoView({ block:'nearest', behavior:'smooth' }));
   play(30); // let the answer play
 }
 
@@ -693,7 +732,14 @@ function finish() {
   const prevBest = games.length ? Math.max(...games.map(g => g.score)) : 0;
   games.unshift({ date:Date.now(), label:G.cfg.label, score:G.score, correct, total:G.total, secs, bestStreak:G.bestStreak, cfg:G.cfg, art:G.queue[0]?.artworkUrl100 });
   store.set('gts-games', games.slice(0, 100));
-  if (G.cfg.daily && store.get('gts-daily-' + G.cfg.daily, null) == null) store.set('gts-daily-' + G.cfg.daily, G.score);
+  G.firstDaily = G.cfg.daily && store.get('gts-daily-' + G.cfg.daily, null) == null;
+  if (G.firstDaily) store.set('gts-daily-' + G.cfg.daily, G.score);
+  // leaderboard: daily counts first run only; normal games go to the board for their round count
+  G.board = G.cfg.daily ? (G.firstDaily ? 'daily-' + G.cfg.daily : null) : 'r' + G.cfg.rounds;
+  $('lbForm').hidden = !LB_ON || !G.board || !G.score;
+  $('lbSend').disabled = false;
+  $('lbName').value = store.get('gts-name', '');
+  $('lbMsg').textContent = !LB_ON ? '' : G.cfg.daily && !G.firstDaily ? 'Only your first daily run goes on the leaderboard.' : '';
   $('eLabel').textContent = G.cfg.label.toUpperCase();
   $('final').textContent = G.score.toLocaleString() + ' pts';
   $('eSub').textContent = G.score > prevBest ? '🏆 New personal best!' : `Personal best: ${prevBest.toLocaleString()} pts`;
@@ -719,15 +765,78 @@ $('skip').onclick = $('skip2').onclick = $('skip3').onclick = () => !done && mis
 $('giveup').onclick = () => { if (!done) { attempts.push('Gave up'); lose('Gave up'); } };
 $('hint').onclick = $('hint2').onclick = () => { if (done) return; hinted = true; draw(); toast('Artist revealed — points halved'); };
 $('nextBtn').onclick = next;
-$('again').onclick = () => startGame(G.cfg);
+$('again').onclick = () => startGame({ ...G.cfg, seed:undefined, challenge:false });
 $('share').onclick = () => {
   const sq = G.history.map(x => x.secs == null ? '🟥' : x.secs <= 1 ? '🟩' : x.secs <= 7 ? '🟨' : '🟧').join('');
-  navigator.clipboard.writeText(`🎵 Guess the Song — ${G.cfg.label}${G.cfg.daily ? ' ' + G.cfg.daily : ''}\n${sq}\n${G.score} pts`)
-    .then(() => toast('Result copied — paste it anywhere'), () => toast('Could not copy'));
+  copy(`🎵 Guess the Song — ${G.cfg.label}${G.cfg.daily ? ' ' + G.cfg.daily : ''}\n${sq}\n${G.score} pts\nBeat me: ${challengeUrl()}`, 'Result copied — paste it anywhere');
 };
+$('challenge').onclick = () => copy(challengeUrl(), 'Challenge link copied — your friend gets the same songs');
+function copy(text, ok) {
+  (navigator.clipboard?.writeText(text) ?? Promise.reject()).then(() => toast(ok), () => prompt('Copy this:', text));
+}
+const CFG_KEYS = ['rounds', 'mode', 'start', 'artist', 'genre', 'decade', 'daily', 'label', 'seed'];
+const challengeUrl = () => location.href.split('#')[0] + '#play=' + encodeURIComponent(JSON.stringify(Object.fromEntries(CFG_KEYS.map(k => [k, G.cfg[k]]))));
+function readChallenge() { // trust boundary: hash comes from anyone, so whitelist every field
+  const m = location.hash.match(/^#play=(.+)$/); if (!m) return null;
+  history.replaceState(null, '', location.pathname + location.search);
+  try {
+    const c = JSON.parse(decodeURIComponent(m[1])), str = (v, n) => typeof v === 'string' ? v.slice(0, n) : '';
+    return mkCfg({
+      rounds: [5, 10, 15, 20].includes(+c.rounds) ? +c.rounds : 10,
+      mode: c.mode === 'mc' ? 'mc' : 'type', start: c.start === 'rand' ? 'rand' : '0',
+      artist: str(c.artist, 60), genre: GENRES.includes(c.genre) ? c.genre : '', decade: DECADES.includes(c.decade) ? c.decade : '',
+      daily: /^\d{4}-\d{2}-\d{2}$/.test(c.daily) ? c.daily : '', label: str(c.label, 40) || 'Challenge',
+      seed: Number.isInteger(c.seed) ? c.seed : undefined, challenge: true, from: 'home',
+    });
+  } catch { return null; }
+}
 $('vol').value = audio.volume = prefs.vol;
 $('vol').oninput = e => { audio.volume = prefs.vol = +e.target.value; store.set('gts-prefs', prefs); };
 audio.onerror = () => G && !done && !$('game').hidden && toast("This preview didn't load — skip or give up");
+
+// ---------- online leaderboard (Supabase REST, no SDK) ----------
+const LB_ON = !!(SUPABASE_URL && SUPABASE_KEY);
+const sb = (path, opts = {}) => fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...opts, headers:{ apikey:SUPABASE_KEY, 'Content-Type':'application/json', ...opts.headers } })
+  .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(new Error(r.status + ' ' + t))));
+const lbCache = {}; // board+mode -> { t, rows }: 30s cache so tab-flipping doesn't hammer the API
+let lbBoard = 'daily-' + today(), lbMode = 'type', myRowId = null;
+function boardChips(box, opts, cur, set) {
+  box.replaceChildren(...opts.map(([v, l]) => { const b = make('button', 'pill' + (v === cur ? ' on' : ''), l); b.onclick = () => { set(v); renderBoard(); }; return b; }));
+}
+async function renderBoard(force) {
+  boardChips($('lbTabs'), [['daily-' + today(), "Today's daily"], ['r5', '5 rounds'], ['r10', '10 rounds'], ['r15', '15 rounds'], ['r20', '20 rounds']], lbBoard, v => lbBoard = v);
+  boardChips($('lbModes'), [['type', 'Type answer'], ['mc', 'Multiple choice']], lbMode, v => lbMode = v);
+  const msg = t => $('lbRows').replaceChildren(row(['', t, '', '', '']));
+  if (!LB_ON) return msg('Online leaderboard is not set up yet.');
+  const key = lbBoard + '|' + lbMode;
+  let c = lbCache[key];
+  if (force || !c || Date.now() - c.t > 30e3) {
+    msg('Loading…');
+    try { c = lbCache[key] = { t:Date.now(), rows: await sb(`scores?select=id,name,label,correct,total,score&board=eq.${encodeURIComponent(lbBoard)}&mode=eq.${lbMode}&order=score.desc,created_at.asc&limit=50`) }; }
+    catch { return msg('Could not load the leaderboard. Try again later.'); }
+    if (key !== lbBoard + '|' + lbMode) return; // tab changed while loading
+  }
+  if (!c.rows.length) return msg('No scores yet — be the first!');
+  $('lbRows').replaceChildren(...c.rows.map((r, i) => row([i < 3 ? make('span', 'medal', ['🥇', '🥈', '🥉'][i]) : i + 1, r.name, r.label, `${r.correct}/${r.total}`, r.score.toLocaleString()], r.id === myRowId ? 'me' : '')));
+}
+$('lbForm').onsubmit = async e => {
+  e.preventDefault();
+  const name = $('lbName').value.trim().replace(/\s+/g, ' ');
+  if (!name || !G?.board) return;
+  store.set('gts-name', name);
+  $('lbSend').disabled = true; $('lbMsg').textContent = 'Submitting…';
+  try {
+    const [r] = await sb('scores', { method:'POST', headers:{ Prefer:'return=representation' },
+      body: JSON.stringify({ name, board:G.board, mode:G.cfg.mode, label:G.cfg.label.slice(0, 40), score:G.score, correct:G.history.filter(x => x.pts).length, total:G.total }) });
+    myRowId = r.id; lbBoard = G.board; lbMode = G.cfg.mode;
+    $('lbForm').hidden = true; $('lbMsg').textContent = '';
+    delete lbCache[lbBoard + '|' + lbMode];
+    go('board');
+  } catch (err) {
+    $('lbSend').disabled = false;
+    $('lbMsg').textContent = /429|rate/.test(err.message) ? 'Leaderboard is busy — try again in a minute.' : 'Could not submit. Check your connection and try again.';
+  }
+};
 
 // Space plays (Shift+Space inside the text box), Enter = next once revealed.
 // Handled on keydown AND swallowed on keyup so a focused button isn't clicked twice.
@@ -741,6 +850,8 @@ document.addEventListener('keyup', e => gameKey(e) && e.preventDefault());
 
 document.querySelectorAll('[data-icon]').forEach(e => e.insertAdjacentHTML('afterbegin', icon(e.dataset.icon, e.classList.contains('nav') ? 24 : 20)));
 setPlaying(false); renderRecent(); show('home');
+const ch = readChallenge(); if (ch) startGame(ch);
+addEventListener('hashchange', () => { const c = readChallenge(); if (c && leaveOk()) startGame(c); });
 </script>
 </body>
 </html>
