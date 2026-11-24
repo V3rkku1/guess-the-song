@@ -6,6 +6,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Guess the Song</title>
+<meta name="description" content="Name the song from a 0.1 second clip. Pick any artist, genre or decade, play the daily challenge and climb the leaderboard.">
+<meta property="og:title" content="Guess the Song">
+<meta property="og:description" content="Can you name it from 0.1 seconds? Daily challenge, any artist, online leaderboard.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#121212">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%231ed760'/%3E%3Cpath d='M10 6v8.3a2.6 2.6 0 1 0 1.6 2.4V9.5h4V6z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -265,7 +271,7 @@
         </div>
         <div id="choices"></div>
         <ul id="attempts"></ul>
-        <div id="result"></div>
+        <div id="result" role="status" aria-live="polite"></div>
         <div class="actions">
           <button class="ghost" id="skip2"></button><button class="ghost" id="giveup">Give up</button>
           <button class="cta" id="nextBtn" hidden></button>
@@ -536,11 +542,15 @@ $('artists').append(...ARTISTS.map(a => card(a, 'Artist', () => startGame(mkCfg(
 $('fiQuick').append(...FI_QUICK.map(([name, desc, cfg]) => card(name, desc, () => startGame(mkCfg({ ...cfg, label:name, from:'home' })), false, coverArt(cfg.terms[1], 'FI'))));
 $('fiArtists').append(...FI_ARTISTS.map(a => card(a, 'Artisti', () => startGame(mkCfg({ artist:a, label:a, country:'FI', from:'home' })), true, artistPic(a).then(u => [u]))));
 
+function untilTomorrow() {
+  const n = new Date(), m = Math.ceil((new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1) - n) / 6e4);
+  return `${Math.floor(m / 60)} h ${m % 60} min`;
+}
 function renderHome() {
   const h = new Date().getHours(), played = store.get('gts-daily-' + today(), null);
   $('greet').textContent = h < 5 ? 'Up late?' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
   $('daily').innerHTML = `<div class="big">${new Date().getDate()}</div><div><div class="label">DAILY CHALLENGE</div><h2>5 songs. One shot at a perfect score.</h2>
-    <div class="sub" style="color:#ddd">${played != null ? `You scored ${played} pts today. Come back tomorrow for a new set.` : 'A new set every day. Not played yet today.'}</div>
+    <div class="sub" style="color:#ddd">${played != null ? `You scored ${played} pts today. New set in ${untilTomorrow()}.` : 'A new set every day. Not played yet today.'}</div>
     <div class="actions" style="margin-top:16px"><button class="cta" id="dailyBtn">${played != null ? 'Replay' : 'Play daily'}</button></div></div>`;
   $('dailyBtn').onclick = () => startGame(mkCfg({ daily:today(), rounds:5, label:'Daily Challenge', from:'home' }));
   $('prefTxt').textContent = `${prefs.rounds} rounds · ${prefs.mode === 'mc' ? 'Multiple choice' : 'Type answer'} · ${prefs.start === 'rand' ? 'Random spot' : 'From the start'} · ${prefs.country || autoCountry()} store`;
@@ -605,7 +615,7 @@ async function buildPool(cfg, r) {
   let terms, extra = { country };
   if (cfg.terms?.length && cfg.byArtist) { // playlist made of artist names: only songs credited to one of them
     const picked = shuffle(cfg.terms, r).slice(0, 4), want = picked.map(fold);
-    const res = (await Promise.all(picked.map(term => itunes({ term, attribute:'artistTerm', country }).catch(() => [])))).flat();
+    const res = (await Promise.all(picked.map(term => itunes({ term, attribute:'artistTerm', country }).then(firstN(40)).catch(() => [])))).flat();
     return finishPool(res.filter(t => credited(t.artistName).some(a => want.includes(a))), cfg);
   }
   if (cfg.terms?.length) terms = shuffle(cfg.terms, r).slice(0, 4);
@@ -614,7 +624,7 @@ async function buildPool(cfg, r) {
     const want = fold(artist).trim(), isExact = t => fold(t.artistName) === want;
     let res = [];
     for (const c of [...new Set([country, 'FI', 'US'])]) {
-      res = res.concat((await itunes({ term:artist, attribute:'artistTerm', country:c }).catch(() => [])).filter(t => fold(t.artistName).includes(want)));
+      res = res.concat((await itunes({ term:artist, attribute:'artistTerm', country:c }).then(firstN(80)).catch(() => [])).filter(t => fold(t.artistName).includes(want)));
       if (res.filter(isExact).length >= 12) break;
     }
     const exact = res.filter(isExact);
@@ -629,9 +639,13 @@ async function buildPool(cfg, r) {
   else if (genre) terms = [genre, genre + ' hits', genre + ' classics'];
   else if (decade) terms = [decade + 's hits', decade + 's', ...shuffle(RANDOM_TERMS, r).slice(0, 2)];
   else terms = shuffle(RANDOM_TERMS, r).slice(0, 3);
-  return finishPool((await Promise.all(terms.map(term => itunes({ term, ...extra })))).flat(), cfg);
+  return finishPool((await Promise.all(terms.map(term => itunes({ term, ...extra }).then(firstN(50))))).flat(), cfg);
 }
+const firstN = n => r => r.slice(0, n); // results come best-match first: the top ones are the songs people know
+const JUNK = /karaoke|tribute|made famous|in the style of|originally performed|instrumental version|cover version|8-bit|lullaby|ringtone|workout mix|sing-along/i;
+console.assert(JUNK.test('Hello (Karaoke Version)') && !JUNK.test('Hello'), 'junk filter');
 function finishPool(res, { genre, decade }) {
+  res = res.filter(t => !JUNK.test([t.trackName, t.collectionName, t.artistName].join(' '))); // karaoke/cover albums are unguessable
   if (genre) res = res.filter(t => (t.primaryGenreName || '').toLowerCase().includes(genre.toLowerCase().split(/[/&]/)[0]));
   if (decade) res = res.filter(t => { const y = +t.releaseDate?.slice(0, 4); return y >= +decade && y < +decade + 10; });
   const seen = new Set();
@@ -648,7 +662,8 @@ async function startGame(cfg) {
   if (my !== loadSeq) return; // user navigated away while loading
   if (pool.length < 4) { toast(pool.length ? 'Not enough songs — try looser filters' : 'No songs found (or no connection)'); return show(cfg.from || 'home'); }
   const total = Math.min(cfg.rounds, pool.length);
-  const queue = shuffle(pool, r).slice(0, total);
+  const seen = new Set(store.get('gts-seen', [])), mixed = shuffle(pool, r);
+  const queue = (cfg.daily || cfg.challenge ? mixed : [...mixed.filter(t => !seen.has(t.trackId)), ...mixed.filter(t => seen.has(t.trackId))]).slice(0, total);
   G = { cfg, pool, total, queue, offsets:queue.map(() => cfg.start === 'rand' ? r() * (28 - MAX) : 0), round:0, score:0, streak:0, bestStreak:0, history:[] };
   show('game'); next();
 }
@@ -753,6 +768,7 @@ function lose(msg) { G.streak = 0; reveal(false, 0, '✗ ' + msg); }
 function reveal(w, pts, msg) {
   done = true; won = w;
   G.history.push({ song, pts, secs: w ? CLIPS[step] : null });
+  store.set('gts-seen', [song.trackId, ...store.get('gts-seen', []).filter(id => id !== song.trackId)].slice(0, 500));
   for (const b of $('choices').children) { b.disabled = true; if (b.song === song) b.classList.add('good'); }
   $('typeBox').hidden = $('skip2').hidden = $('giveup').hidden = true;
   const big = song.artworkUrl100.replace('100x100', '600x600');
@@ -896,6 +912,7 @@ document.addEventListener('keydown', e => {
   if (!e.repeat) e.code === 'Space' ? togglePlay() : next();
 });
 document.addEventListener('keyup', e => gameKey(e) && e.preventDefault());
+document.addEventListener('visibilitychange', () => document.hidden && stop());
 
 document.querySelectorAll('[data-icon]').forEach(e => e.insertAdjacentHTML('afterbegin', icon(e.dataset.icon, e.classList.contains('nav') ? 24 : 20)));
 setPlaying(false); renderRecent(); show('home');
