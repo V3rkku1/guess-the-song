@@ -6,88 +6,149 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Guess the Song</title>
 <style>
-  :root { --bg:#0f0f17; --card:#1b1b28; --fg:#eee; --mute:#888; --acc:#7c5cff; --ok:#2ecc71; --bad:#e74c3c; }
+  :root { --bg:#121212; --panel:#181818; --hover:#282828; --fg:#fff; --mute:#b3b3b3; --dim:#535353; --acc:#1ed760; --bad:#f15e6c; }
   * { box-sizing:border-box; }
-  body { margin:0; font:16px system-ui,sans-serif; background:var(--bg); color:var(--fg); display:grid; place-items:center; min-height:100vh; padding:16px; }
-  main { width:100%; max-width:520px; background:var(--card); border-radius:16px; padding:24px; }
-  h1 { margin:0 0 16px; text-align:center; }
-  label { display:block; margin:10px 0 4px; color:var(--mute); font-size:14px; }
-  input, select, button { width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#111; color:var(--fg); font:inherit; }
-  button { background:var(--acc); border:0; cursor:pointer; margin-top:10px; font-weight:600; }
+  body { margin:0; font:15px/1.4 "Helvetica Neue",Helvetica,Arial,system-ui,sans-serif; background:#000; color:var(--fg); min-height:100vh; padding:8px; }
+  main { max-width:760px; margin:0 auto; min-height:calc(100vh - 16px); border-radius:8px; padding:24px; background:linear-gradient(#1f3d2a, var(--bg) 320px); }
+  h1 { font-size:32px; margin:0 0 4px; letter-spacing:-1px; } h2 { font-size:20px; margin:24px 0 10px; }
+  .sub { color:var(--mute); margin:0 0 8px; }
+  input { width:100%; padding:12px 16px; border-radius:500px; border:0; background:#242424; color:var(--fg); font:inherit; outline:2px solid transparent; }
+  input:focus { outline-color:var(--fg); }
+  button { font:inherit; cursor:pointer; border:0; color:inherit; }
   button:disabled { opacity:.4; cursor:default; }
-  button.alt { background:#333; }
-  .row { display:flex; gap:8px; } .row > * { flex:1; }
-  .bar { display:flex; gap:4px; margin:16px 0; } .bar div { flex:1; height:8px; border-radius:4px; background:#333; }
-  .bar .on { background:var(--acc); } .bar .miss { background:var(--bad); }
-  .stats { display:flex; justify-content:space-between; color:var(--mute); font-size:14px; }
-  .big { font-size:48px; text-align:center; margin:8px 0; }
-  #choices button { background:#2a2a3d; text-align:left; } #choices button.bad { background:var(--bad); } #choices button.good { background:var(--ok); }
-  #reveal img { width:120px; border-radius:8px; display:block; margin:0 auto 8px; }
-  #reveal, .center { text-align:center; }
-  #log { color:var(--mute); font-size:14px; min-height:20px; margin-top:8px; }
+  .pill { padding:8px 14px; border-radius:500px; background:#2a2a2a; margin:0 6px 8px 0; font-size:14px; }
+  .pill:hover { background:#333; } .pill.on { background:var(--fg); color:#000; }
+  .cta { background:var(--acc); color:#000; font-weight:700; padding:14px 32px; border-radius:500px; font-size:16px; transition:transform .1s; }
+  .cta:hover:not(:disabled) { transform:scale(1.04); background:#3be477; }
+  .ghost { background:none; border:1px solid var(--dim); padding:13px 28px; border-radius:500px; font-weight:700; font-size:16px; }
+  .ghost:hover { border-color:var(--fg); }
+  #log { color:var(--mute); margin-top:12px; min-height:20px; }
+
+  .top { display:flex; justify-content:space-between; color:var(--mute); font-size:14px; font-weight:700; }
+  .now { display:flex; gap:24px; align-items:flex-end; margin:24px 0; flex-wrap:wrap; }
+  .art { width:200px; height:200px; border-radius:6px; background:linear-gradient(135deg,#450af5,#c4efd9); box-shadow:0 8px 24px rgba(0,0,0,.5); display:grid; place-items:center; font-size:80px; font-weight:900; overflow:hidden; flex:none; }
+  .art img { width:100%; height:100%; object-fit:cover; }
+  .now .meta { flex:1; min-width:200px; }
+  .label { font-size:12px; font-weight:700; text-transform:uppercase; }
+  .now .title { font-size:40px; font-weight:900; letter-spacing:-1.5px; margin:4px 0; line-height:1.1; word-break:break-word; }
+  .now .artist { color:var(--mute); font-weight:700; }
+
+  .player { background:var(--panel); border-radius:8px; padding:16px; }
+  .controls { display:flex; align-items:center; justify-content:center; gap:24px; }
+  .play { width:56px; height:56px; border-radius:50%; background:var(--acc); color:#000; font-size:22px; display:grid; place-items:center; transition:transform .1s; }
+  .play:hover { transform:scale(1.06); }
+  .icon { background:none; color:var(--mute); font-size:14px; font-weight:700; min-width:80px; }
+  .icon:hover:not(:disabled) { color:var(--fg); }
+  .track { position:relative; height:6px; background:#4d4d4d; border-radius:3px; margin:18px 0 6px; }
+  .unlocked { position:absolute; inset:0 auto 0 0; background:#888; border-radius:3px; transition:width .3s; }
+  .head { position:absolute; inset:0 auto 0 0; background:var(--acc); border-radius:3px; }
+  .tick { position:absolute; top:-3px; width:2px; height:12px; background:var(--panel); }
+  .times { display:flex; justify-content:space-between; color:var(--mute); font-size:12px; }
+  .tries { display:flex; gap:4px; margin-top:12px; } .tries div { flex:1; height:4px; border-radius:2px; background:#333; }
+  .tries .miss { background:var(--bad); } .tries .cur { background:var(--fg); }
+  .vol { display:flex; align-items:center; gap:8px; color:var(--mute); font-size:13px; justify-content:flex-end; margin-top:10px; }
+  .vol input { width:100px; padding:0; accent-color:var(--acc); background:none; }
+
+  .guess { display:flex; gap:8px; margin-top:16px; } .guess input { flex:1; }
+  #choices { display:grid; gap:8px; margin-top:16px; }
+  #choices button { display:flex; align-items:center; gap:12px; text-align:left; background:var(--panel); padding:10px 14px; border-radius:6px; }
+  #choices button:hover:not(:disabled) { background:var(--hover); }
+  #choices button.bad { color:var(--bad); text-decoration:line-through; } #choices button.good { color:var(--acc); background:var(--hover); opacity:1; }
+  #choices small { display:block; color:var(--mute); }
+  #feedback { min-height:24px; margin-top:12px; font-weight:700; }
+  .next { margin-top:8px; }
+
+  table { width:100%; border-collapse:collapse; margin-top:8px; font-size:14px; }
+  th { color:var(--mute); font-weight:400; text-align:left; border-bottom:1px solid #2a2a2a; padding:8px; }
+  td { padding:8px; } tr:hover td { background:#ffffff12; }
+  td img { width:40px; height:40px; border-radius:4px; vertical-align:middle; margin-right:8px; }
+  td small { color:var(--mute); display:block; }
+  .num { color:var(--mute); width:24px; } .pts { text-align:right; }
+  .score { font-size:64px; font-weight:900; letter-spacing:-2px; margin:8px 0; }
   [hidden] { display:none !important; }
+  @media (max-width:520px) { main { padding:16px; } .art { width:140px; height:140px; } .now .title { font-size:28px; } .controls { gap:12px; } }
 </style>
 </head>
 <body>
 <main>
-  <h1>🎵 Guess the Song</h1>
-
   <section id="setup">
-    <label>Artist only (optional)</label>
-    <input id="artist" placeholder="e.g. Queen">
-    <label>Genre only (optional)</label>
-    <select id="genre">
-      <option value="">Any</option>
-      <option>Pop</option><option>Rock</option><option>Hip-Hop/Rap</option><option>R&B/Soul</option>
-      <option>Dance</option><option>Electronic</option><option>Country</option><option>Alternative</option>
-      <option>Metal</option><option>Jazz</option><option>K-Pop</option><option>Latin</option><option>Reggae</option><option>Classical</option>
-    </select>
-    <div class="row">
-      <div><label>Decade</label>
-        <select id="decade"><option value="">Any</option><option>1960</option><option>1970</option><option>1980</option><option>1990</option><option>2000</option><option>2010</option><option>2020</option></select></div>
-      <div><label>Rounds</label>
-        <select id="rounds"><option>5</option><option selected>10</option><option>20</option></select></div>
-    </div>
-    <div class="row">
-      <div><label>Mode</label>
-        <select id="mode"><option value="type">Type answer</option><option value="mc">Multiple choice</option></select></div>
-      <div><label>Clip start</label>
-        <select id="start"><option value="0">Beginning</option><option value="rand">Random spot</option></select></div>
-    </div>
-    <button id="go">Start</button>
+    <h1>Guess the Song</h1>
+    <p class="sub">Hear 0.1 seconds. Each skip or miss unlocks more, up to 15s. Fewer seconds = more points.</p>
+    <h2>Artist</h2>
+    <input id="artist" placeholder="Which artist? (optional)">
+    <h2>Genre</h2>
+    <div class="chips" data-key="genre"><button class="pill on" data-v="">All</button></div>
+    <h2>Decade</h2>
+    <div class="chips" data-key="decade"><button class="pill on" data-v="">All</button></div>
+    <h2>Game</h2>
+    <div class="chips" data-key="rounds"><button class="pill" data-v="5">5 rounds</button><button class="pill on" data-v="10">10 rounds</button><button class="pill" data-v="20">20 rounds</button></div>
+    <div class="chips" data-key="mode"><button class="pill on" data-v="type">Type answer</button><button class="pill" data-v="mc">Multiple choice</button></div>
+    <div class="chips" data-key="start"><button class="pill on" data-v="0">Start from beginning</button><button class="pill" data-v="rand">Random spot</button></div>
+    <p><button id="go" class="cta">Play</button></p>
     <div id="log"></div>
   </section>
 
   <section id="game" hidden>
-    <div class="stats"><span id="roundTxt"></span><span id="streakTxt"></span><span id="scoreTxt"></span></div>
-    <div class="bar" id="bar"></div>
-    <div class="big" id="clipTxt"></div>
-    <div class="row"><button id="play">▶ Play clip</button><button id="skip" class="alt">Skip (+time)</button></div>
-    <div id="typeBox">
-      <input id="guess" list="titles" placeholder="Song title…" autocomplete="off">
+    <div class="top"><span id="roundTxt"></span><span id="streakTxt"></span><span id="scoreTxt"></span></div>
+    <div class="now">
+      <div class="art" id="art">?</div>
+      <div class="meta">
+        <div class="label">Now guessing</div>
+        <div class="title" id="songTitle">???</div>
+        <div class="artist" id="songArtist">Unknown artist</div>
+      </div>
+    </div>
+    <div class="player">
+      <div class="controls">
+        <button class="icon" id="hint" title="Show artist (halves points)">Hint</button>
+        <button class="play" id="play" title="Play (Space)">▶</button>
+        <button class="icon" id="skip" title="Skip for more time">Skip +<span id="skipBy"></span>s</button>
+      </div>
+      <div class="track" id="track"><div class="unlocked" id="unlocked"></div><div class="head" id="head"></div></div>
+      <div class="times"><span id="clipTxt"></span><span>15s</span></div>
+      <div class="tries" id="tries"></div>
+      <div class="vol">🔊 <input type="range" id="vol" min="0" max="1" step="0.05" value="0.7"></div>
+    </div>
+    <div class="guess" id="typeBox">
+      <input id="guess" list="titles" placeholder="Know it? Type the song title…" autocomplete="off">
       <datalist id="titles"></datalist>
-      <button id="submit">Guess</button>
+      <button class="cta" id="submit">Guess</button>
     </div>
     <div id="choices"></div>
-    <div id="reveal" hidden></div>
+    <div id="feedback"></div>
+    <button class="cta next" id="nextBtn" hidden>Next</button>
   </section>
 
-  <section id="end" class="center" hidden>
-    <p>Final score</p>
-    <div class="big" id="final"></div>
-    <p id="best"></p>
-    <button id="again">Play again</button>
+  <section id="end" hidden>
+    <div class="label">Your score</div>
+    <div class="score" id="final"></div>
+    <p class="sub" id="best"></p>
+    <p><button class="cta" id="same">Play again</button> <button class="ghost" id="again">Change settings</button></p>
+    <h2>Tracklist</h2>
+    <table><thead><tr><th>#</th><th>Title</th><th>Heard</th><th class="pts">Points</th></tr></thead><tbody id="tracks"></tbody></table>
   </section>
 </main>
 <audio id="audio" preload="auto"></audio>
 
 <script>
-const CLIPS = [0.1, 0.5, 1, 2, 3, 5];          // seconds per attempt
-const POINTS = [1000, 800, 600, 400, 250, 100];
+const CLIPS  = [0.1, 0.5, 1, 2, 4, 7, 10, 15];        // seconds unlocked per attempt
+const POINTS = [1000, 850, 700, 550, 400, 300, 200, 100];
+const MAX = CLIPS.at(-1);
+const GENRES = ['Pop','Rock','Hip-Hop/Rap','R&B/Soul','Dance','Electronic','Country','Alternative','Metal','Jazz','K-Pop','Latin','Reggae','Classical'];
+const DECADES = [1960,1970,1980,1990,2000,2010,2020];
 const RANDOM_TERMS = ['love','night','baby','heart','dance','fire','summer','girl','dream','money','home','light','party','rain','forever'];
 const $ = id => document.getElementById(id);
 const audio = $('audio');
-let pool = [], queue = [], song, step, score, streak, round, total, timer, offset, opts;
+let pool = [], queue = [], history = [], song, step, score, streak, round, total, offset, hinted, done, raf;
+
+// chips: one selected per group, value read from .on
+for (const g of GENRES) document.querySelector('[data-key=genre]').insertAdjacentHTML('beforeend', `<button class="pill" data-v="${g}">${g}</button>`);
+for (const d of DECADES) document.querySelector('[data-key=decade]').insertAdjacentHTML('beforeend', `<button class="pill" data-v="${d}">${d}s</button>`);
+document.querySelectorAll('.chips').forEach(c => c.onclick = e => {
+  if (e.target.dataset.v === undefined) return;
+  c.querySelector('.on').classList.remove('on'); e.target.classList.add('on');
+});
+const opt = k => document.querySelector(`[data-key=${k}] .on`).dataset.v;
 
 // JSONP: iTunes search CORS is unreliable, script tag always works.
 function itunes(params) {
@@ -101,15 +162,27 @@ function itunes(params) {
 }
 
 const norm = s => s.toLowerCase().replace(/\s*[([].*?[)\]]/g, '').replace(/\s-\s.*$/, '').replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
-console.assert(norm('Don\'t Stop Me Now (Remastered 2011)') === norm('dont stop me now'), 'norm strips parens/punct');
-console.assert(norm('Hello - Radio Edit') === 'hello', 'norm strips " - suffix"');
+function lev(a, b) { // edit distance, for typo tolerance
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] !== b[j - 1]));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+const matches = (g, t) => { const a = norm(g), b = norm(t); return !!a && lev(a, b) <= Math.floor(b.length / 5); };
+console.assert(matches('dont stop me now', "Don't Stop Me Now (Remastered 2011)"), 'strips parens/punct');
+console.assert(matches('hello', 'Hello - Radio Edit'), 'strips " - suffix"');
+console.assert(matches('bohemian rapsody', 'Bohemian Rhapsody'), 'tolerates typo');
+console.assert(!matches('love', 'Lovely'), 'rejects different short title');
 const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(v => v[1]);
 
 async function buildPool() {
-  const artist = $('artist').value.trim(), genre = $('genre').value, decade = +$('decade').value;
+  const artist = $('artist').value.trim(), genre = opt('genre'), decade = +opt('decade');
   let res;
   if (artist) res = (await itunes({ term:artist, attribute:'artistTerm' })).filter(t => t.artistName.toLowerCase().includes(artist.toLowerCase()));
-  else if (genre) res = (await Promise.all([genre, genre + ' hits'].map(term => itunes({ term })))).flat();
+  else if (genre) res = (await Promise.all([genre, genre + ' hits', genre + ' classics'].map(term => itunes({ term })))).flat();
   else res = (await Promise.all(shuffle(RANDOM_TERMS).slice(0, 3).map(term => itunes({ term })))).flat();
   if (genre) res = res.filter(t => (t.primaryGenreName || '').toLowerCase().includes(genre.toLowerCase().split(/[/&]/)[0]));
   if (decade) res = res.filter(t => { const y = +t.releaseDate?.slice(0, 4); return y >= decade && y < decade + 10; });
@@ -117,86 +190,121 @@ async function buildPool() {
   return res.filter(t => t.previewUrl && !seen.has(norm(t.trackName)) && seen.add(norm(t.trackName)));
 }
 
-$('go').onclick = async () => {
+async function start() {
+  show('setup');
   $('go').disabled = true; $('log').textContent = 'Loading songs…';
-  try { pool = await buildPool(); } catch (e) { pool = []; }
+  try { pool = await buildPool(); } catch { pool = []; }
   $('go').disabled = false;
   if (pool.length < 4) return $('log').textContent = 'Not enough songs found. Try looser filters.';
   $('log').textContent = '';
-  opts = { mode:$('mode').value, start:$('start').value };
-  total = Math.min(+$('rounds').value, pool.length);
+  total = Math.min(+opt('rounds'), pool.length);
   queue = shuffle(pool).slice(0, total);
   $('titles').replaceChildren(...pool.map(t => new Option('', t.trackName)));
-  score = streak = round = 0;
+  score = streak = round = 0; history = [];
   show('game'); next();
-};
+}
+$('go').onclick = $('same').onclick = start;
+$('again').onclick = () => show('setup');
 
-function show(id) { for (const s of ['setup', 'game', 'end']) $(s).hidden = s !== id; }
+function show(id) { for (const s of ['setup', 'game', 'end']) $(s).hidden = s !== id; scrollTo(0, 0); }
 
 function next() {
-  audio.pause();
+  stop();
   if (round === total) return finish();
-  song = queue[round++]; step = 0;
-  offset = opts.start === 'rand' ? Math.random() * 20 : 0; // previews are ~30s
+  song = queue[round++]; step = 0; hinted = done = false;
+  offset = opt('start') === 'rand' ? Math.random() * (28 - MAX) : 0; // previews ~30s, keep 15s window inside
   audio.src = song.previewUrl;
-  $('guess').value = ''; $('reveal').hidden = true;
-  $('typeBox').hidden = opts.mode !== 'type'; $('play').parentNode.hidden = false;
-  if (opts.mode === 'mc') {
-    const opts4 = shuffle([song, ...shuffle(pool.filter(t => t !== song)).slice(0, 3)]);
-    $('choices').innerHTML = '';
-    for (const t of opts4) {
-      const b = document.createElement('button');
-      b.textContent = `${t.trackName} — ${t.artistName}`;
-      b.song = t;
-      b.onclick = () => guess(t === song, b);
-      $('choices').append(b);
-    }
-  } else $('choices').innerHTML = '';
+  $('art').textContent = '?'; $('songTitle').textContent = '???'; $('songArtist').textContent = 'Unknown artist';
+  $('guess').value = ''; $('feedback').textContent = ''; $('nextBtn').hidden = true;
+  $('typeBox').hidden = opt('mode') !== 'type';
+  $('hint').disabled = $('skip').disabled = false;
+  $('choices').replaceChildren();
+  if (opt('mode') === 'mc') for (const t of shuffle([song, ...shuffle(pool.filter(t => t !== song)).slice(0, 3)])) {
+    const b = document.createElement('button');
+    b.song = t;
+    b.innerHTML = '<span>♪</span><span><b></b><small></small></span>';
+    b.querySelector('b').textContent = t.trackName;   // textContent: API strings not trusted as HTML
+    b.querySelector('small').textContent = t.artistName;
+    b.onclick = () => guess(t === song, b);
+    $('choices').append(b);
+  }
   draw();
+  if (opt('mode') === 'type') $('guess').focus();
 }
 
+const worth = () => Math.round(POINTS[step] / (hinted ? 2 : 1));
 function draw() {
-  $('roundTxt').textContent = `Round ${round}/${total}`;
-  $('streakTxt').textContent = streak > 1 ? `🔥 ${streak}` : '';
+  $('roundTxt').textContent = `Round ${round} of ${total}`;
+  $('streakTxt').textContent = streak > 1 ? `🔥 ${streak} streak` : '';
   $('scoreTxt').textContent = `${score} pts`;
-  $('clipTxt').textContent = `${CLIPS[step]}s · ${POINTS[step]} pts`;
-  $('bar').innerHTML = CLIPS.map((_, i) => `<div class="${i < step ? 'miss' : i === step ? 'on' : ''}"></div>`).join('');
+  $('clipTxt').textContent = done ? '' : `${CLIPS[step]}s unlocked · ${worth()} pts`;
+  $('skipBy').textContent = step < CLIPS.length - 1 ? +(CLIPS[step + 1] - CLIPS[step]).toFixed(1) : 0;
+  $('unlocked').style.width = (done ? 100 : CLIPS[step] / MAX * 100) + '%';
+  $('head').style.width = '0';
+  $('track').querySelectorAll('.tick').forEach(t => t.remove());
+  for (const c of CLIPS.slice(0, -1)) $('track').insertAdjacentHTML('beforeend', `<div class="tick" style="left:${c / MAX * 100}%"></div>`);
+  $('tries').innerHTML = CLIPS.map((_, i) => `<div class="${i < step ? 'miss' : i === step && !done ? 'cur' : ''}"></div>`).join('');
 }
 
-$('play').onclick = () => {
-  clearTimeout(timer);
+// rAF stop check: tighter than setTimeout for the 0.1s clip
+function play(len) {
+  stop();
   audio.currentTime = offset;
   audio.play().catch(() => {});
-  timer = setTimeout(() => audio.pause(), CLIPS[step] * 1000);
+  $('play').textContent = '❚❚';
+  const tick = () => {
+    const t = audio.currentTime - offset;
+    $('head').style.width = Math.min(t / MAX * 100, 100) + '%';
+    if (t >= len || audio.ended) return stop();
+    raf = requestAnimationFrame(tick);
+  };
+  raf = requestAnimationFrame(tick);
+}
+function stop() { cancelAnimationFrame(raf); audio.pause(); $('play').textContent = '▶'; }
+
+$('play').onclick = () => audio.paused ? play(done ? 30 : CLIPS[step]) : stop();
+$('vol').oninput = e => audio.volume = e.target.value;
+audio.volume = $('vol').value;
+$('submit').onclick = () => { const g = $('guess').value.trim(); if (g) guess(matches(g, song.trackName)); };
+$('guess').onkeydown = e => e.key === 'Enter' && $('submit').click();
+$('skip').onclick = () => guess(false, null, true);
+$('hint').onclick = () => { hinted = true; $('hint').disabled = true; $('songArtist').textContent = song.artistName; draw(); };
+$('nextBtn').onclick = next;
+document.onkeydown = e => {
+  if (e.target.tagName === 'INPUT' || $('game').hidden) return;
+  if (e.code === 'Space') { e.preventDefault(); $('play').click(); }
+  if (e.key === 'Enter' && done) next();
 };
 
-$('submit').onclick = () => { const g = $('guess').value.trim(); if (g) guess(norm(g) === norm(song.trackName)); };
-$('guess').onkeydown = e => e.key === 'Enter' && $('submit').click();
-$('skip').onclick = () => guess(false);
-
-function guess(right, btn) {
+function guess(right, btn, skipped) {
+  if (done) return;
   if (right) {
-    const pts = POINTS[step] + streak * 50; // streak bonus
+    const pts = worth() + streak * 50; // streak bonus
     score += pts; streak++;
-    return reveal(`✅ +${pts}`);
+    return reveal(`✓ Got it in ${CLIPS[step]}s  +${pts}`, pts);
   }
   if (btn) { btn.classList.add('bad'); btn.disabled = true; }
+  $('feedback').textContent = skipped ? '' : '✗ Nope';
+  $('feedback').style.color = 'var(--bad)';
   $('guess').value = '';
-  if (++step === CLIPS.length) { streak = 0; return reveal('❌ Out of tries'); }
+  if (++step === CLIPS.length) { streak = 0; return reveal('✗ Out of tries', 0); }
   draw();
+  play(CLIPS[step]); // auto-play the longer clip
 }
 
-function reveal(msg) {
-  clearTimeout(timer);
+function reveal(msg, pts) {
+  done = true;
+  history.push({ song, pts, heard: pts ? CLIPS[step] + 's' : '—' });
   for (const b of $('choices').children) { b.disabled = true; if (b.song === song) b.classList.add('good'); }
-  $('typeBox').hidden = $('play').parentNode.hidden = true;
-  $('reveal').hidden = false;
-  $('reveal').innerHTML = `<p>${msg}</p><img src="${song.artworkUrl100}" alt=""><b></b><br><span></span><button id="nextBtn">${round === total ? 'Results' : 'Next'}</button>`;
-  $('reveal').querySelector('b').textContent = song.trackName;        // textContent: API strings not trusted as HTML
-  $('reveal').querySelector('span').textContent = song.artistName;
-  $('nextBtn').onclick = next;
-  draw(); $('clipTxt').textContent = '';
-  audio.currentTime = offset; audio.play().catch(() => {}); // play the answer
+  $('typeBox').hidden = true; $('hint').disabled = $('skip').disabled = true;
+  const img = new Image(); img.alt = ''; img.src = song.artworkUrl100.replace('100x100', '400x400');
+  $('art').replaceChildren(img);
+  $('songTitle').textContent = song.trackName; $('songArtist').textContent = song.artistName;
+  $('feedback').textContent = msg; $('feedback').style.color = pts ? 'var(--acc)' : 'var(--bad)';
+  $('nextBtn').textContent = round === total ? 'See results' : 'Next song';
+  $('nextBtn').hidden = false;
+  draw();
+  play(30); // let the answer play
 }
 
 function finish() {
@@ -204,9 +312,17 @@ function finish() {
   $('final').textContent = score;
   let best = 0;
   try { best = Math.max(score, +localStorage.getItem('gts-best') || 0); localStorage.setItem('gts-best', best); } catch {}
-  $('best').textContent = `Best: ${best}`;
+  $('best').textContent = `${history.filter(h => h.pts).length}/${total} correct · Best: ${best}`;
+  $('tracks').replaceChildren(...history.map((h, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="num">${i + 1}</td><td style="display:flex;align-items:center"><img alt=""><span><span></span><small></small></span></td><td>${h.heard}</td><td class="pts">${h.pts}</td>`;
+    tr.querySelector('img').src = h.song.artworkUrl100;
+    tr.querySelector('span span').textContent = h.song.trackName;
+    tr.querySelector('small').textContent = h.song.artistName;
+    tr.style.color = h.pts ? '' : 'var(--mute)';
+    return tr;
+  }));
 }
-$('again').onclick = () => show('setup');
 </script>
 </body>
 </html>
