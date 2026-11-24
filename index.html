@@ -33,7 +33,7 @@
   .ritem div { min-width:0; }
   .ritem b, .ritem small { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ritem small, .sub { color:var(--mute); }
-  .sq { width:48px; height:48px; border-radius:4px; flex:none; background:linear-gradient(135deg,hsl(var(--h) 65% 45%),hsl(calc(var(--h) + 50) 65% 25%)); }
+  .sq { width:48px; height:48px; border-radius:4px; flex:none; overflow:hidden; background:linear-gradient(135deg,hsl(var(--h) 65% 45%),hsl(calc(var(--h) + 50) 65% 25%)); }
   .empty { color:var(--mute); font-size:14px; padding:8px 12px; }
 
   .main { grid-area:main; background:var(--bg); border-radius:8px; overflow:auto; min-height:0; }
@@ -53,7 +53,7 @@
   .ac.search input { padding-left:48px; }
   .suggest { position:absolute; z-index:20; left:0; right:0; top:calc(100% + 6px); margin:0; padding:6px; list-style:none; background:#282828; border-radius:8px; box-shadow:0 16px 32px rgba(0,0,0,.6); max-height:340px; overflow:auto; }
   .suggest li { padding:10px 14px; border-radius:4px; cursor:pointer; display:flex; gap:12px; align-items:center; }
-  .suggest li svg { color:var(--mute); }
+  .suggest li svg { color:var(--mute); } .suggest li img { width:36px; height:36px; border-radius:4px; object-fit:cover; flex:none; } .suggest li img.r { border-radius:50%; } .suggest li small { margin-left:auto; color:var(--mute); font-size:12px; }
   .suggest li:hover, .suggest li.on { background:#3e3e3e; }
   .suggest mark { background:none; color:var(--acc); font-weight:700; }
 
@@ -72,6 +72,11 @@
   .card:hover { background:var(--hover); }
   .cover { position:relative; aspect-ratio:1; border-radius:6px; margin-bottom:12px; background:linear-gradient(135deg,hsl(var(--h) 70% 50%),hsl(calc(var(--h) + 60) 70% 26%)); box-shadow:0 8px 24px rgba(0,0,0,.5); display:flex; align-items:flex-end; padding:14px; font-weight:900; font-size:22px; line-height:1.05; letter-spacing:-.03em; overflow:hidden; }
   .cover.round { border-radius:50%; align-items:center; justify-content:center; font-size:44px; }
+  .cover .t { position:relative; z-index:1; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+  .mosaic { position:absolute; inset:0; display:grid; grid-template-columns:1fr 1fr; }
+  .mosaic.one { grid-template-columns:1fr; }
+  .mosaic img { width:100%; height:100%; object-fit:cover; display:block; animation:pop .4s; }
+  .cover:not(.round) .mosaic:not(:empty)::after { content:""; position:absolute; inset:0; background:linear-gradient(transparent 35%, rgba(0,0,0,.75)); }
   .fab { position:absolute; right:8px; bottom:8px; width:48px; height:48px; border-radius:50%; background:var(--acc); color:#000; display:grid; place-items:center; box-shadow:0 8px 8px rgba(0,0,0,.3); opacity:0; transform:translateY(8px); transition:opacity .25s, transform .25s; }
   .card:hover .fab, .card:focus-visible .fab { opacity:1; transform:none; }
   .card b { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -80,7 +85,21 @@
   .daily .big { width:128px; height:128px; border-radius:8px; background:linear-gradient(135deg,#f037a5,#ffc864); display:grid; place-items:center; font-size:56px; font-weight:900; flex:none; box-shadow:0 8px 24px rgba(0,0,0,.4); }
   .daily h2 { margin:4px 0 6px; }
 
-  .hero { display:flex; gap:24px; align-items:flex-end; --tint:hsl(var(--hue) 45% 32%); }
+  #game { position:relative; min-height:100%; isolation:isolate; background:radial-gradient(ellipse at 50% 0, hsl(var(--hue) 50% 26%), var(--bg) 65%); }
+  .gbg { position:absolute; inset:0; z-index:-1; background:center/cover no-repeat; filter:blur(60px) saturate(1.4); opacity:.35; transition:opacity .6s; -webkit-mask-image:linear-gradient(#000 30%, transparent 80%); mask-image:linear-gradient(#000 30%, transparent 80%); }
+  .stage { max-width:680px; margin:0 auto; padding:24px 24px 48px; text-align:center; display:flex; flex-direction:column; align-items:center; }
+  .stage > * { width:100%; }
+  .stage .statrow, .stage .pctrl, .stage .actions { justify-content:center; }
+  .stage .art { width:min(280px,30vh); height:min(280px,30vh); margin:4px auto 20px; box-shadow:0 24px 64px hsl(var(--hue) 60% 12% / .9); }
+  .stage h1 { font-size:clamp(28px,4vw,48px); margin:0 0 6px; }
+  .stage .tries { margin:20px 0 16px; }
+  .pctrl { display:flex; align-items:center; gap:28px; margin-bottom:20px; }
+  .pctrl .bigplay { width:72px; height:72px; margin:0; box-shadow:0 8px 24px rgba(30,215,96,.25); }
+  .round-btn { width:48px; height:48px; border-radius:50%; background:#ffffff14; color:var(--fg); display:grid; place-items:center; transition:background .15s, transform .1s; }
+  .round-btn:hover:not(:disabled) { background:#ffffff26; transform:scale(1.06); }
+  .stage .guess { text-align:left; }
+  .stage #attempts, .stage .result { text-align:left; }
+  .keys { font-size:13px; margin-top:20px; }
   .art, .mini { flex:none; overflow:hidden; display:grid; place-items:center; background:linear-gradient(135deg,hsl(var(--hue) 70% 50%),hsl(calc(var(--hue) + 60) 70% 25%)); }
   .art { width:232px; height:232px; border-radius:6px; box-shadow:0 8px 40px rgba(0,0,0,.6); font-size:40px; }
   .art img, .mini img { width:100%; height:100%; object-fit:cover; animation:pop .4s; }
@@ -105,8 +124,8 @@
   #choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .choice { display:flex; gap:14px; align-items:center; text-align:left; background:var(--el); border-radius:6px; padding:8px; transition:background .15s; min-width:0; }
   .choice:hover:not(:disabled) { background:#333; }
-  .choice .n { width:48px; height:48px; border-radius:4px; background:#333; display:grid; place-items:center; flex:none; color:var(--mute); font-weight:700; }
-  .choice div { min-width:0; }
+  .choice .n { width:56px; height:56px; border-radius:4px; background:#333; overflow:hidden; display:grid; place-items:center; flex:none; color:var(--mute); font-weight:700; }
+  .choice .n img { width:100%; height:100%; object-fit:cover; } .choice div { min-width:0; }
   .choice b, .choice small { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .choice small { color:var(--mute); }
   .choice.bad b { text-decoration:line-through; color:var(--bad); }
   .choice.good { background:#1d3a28; box-shadow:inset 0 0 0 2px var(--acc); opacity:1; }
@@ -151,7 +170,7 @@
   .center { display:grid; place-items:center; align-content:center; min-height:100%; gap:16px; color:var(--mute); }
   .spin { width:48px; height:48px; border:4px solid #333; border-top-color:var(--acc); border-radius:50%; animation:spin .8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
-  #toast { position:fixed; left:50%; bottom:100px; transform:translate(-50%,20px); background:#fff; color:#000; padding:10px 18px; border-radius:8px; font-weight:700; opacity:0; transition:.25s; pointer-events:none; z-index:50; }
+  #toast { position:fixed; left:50%; top:24px; transform:translate(-50%,-20px); background:#fff; color:#000; padding:10px 18px; border-radius:8px; font-weight:700; opacity:0; transition:.25s; pointer-events:none; z-index:50; }
   #toast.show { opacity:1; transform:translate(-50%,0); }
 
   @media (max-width:860px) {
@@ -161,7 +180,7 @@
     .logo { padding:8px; font-size:16px; } nav { display:flex; } .nav { padding:8px; gap:6px; font-size:13px; }
     .main { border-radius:0; }
     .head { padding:32px 16px 16px; } .body { padding:8px 16px 32px; }
-    .hero { flex-direction:column; align-items:flex-start; } .art { width:160px; height:160px; }
+    .stage { padding:24px 16px 32px; } .stage .art { width:200px; height:200px; }
     .daily { flex-direction:column; align-items:flex-start; }
     .bar { grid-template-columns:1fr auto; height:64px; } .right, .prog { display:none; }
     #choices { grid-template-columns:1fr; } .seg span { font-size:10px; }
@@ -217,22 +236,21 @@
     <section id="loading" class="center" hidden><div class="spin"></div><div>Finding songs…</div></section>
 
     <section id="game" hidden>
-      <div class="head hero">
+      <div class="gbg" id="gbg"></div>
+      <div class="stage">
+        <div class="label" id="gLabel"></div>
+        <div class="statrow"><span class="chip" id="roundTxt"></span><span class="chip" id="scoreTxt"></span><span class="chip" id="streakTxt"></span></div>
         <div class="art" id="art"></div>
-        <div>
-          <div class="label" id="gLabel"></div>
-          <h1 id="songTitle"></h1>
-          <div class="sub" id="songArtist"></div>
-        </div>
-      </div>
-      <div class="body narrow">
-        <div class="statrow">
-          <button class="bigplay" id="play2" aria-label="Play clip (Space)" title="Play clip (Space)"></button>
-          <span class="chip" id="roundTxt"></span><span class="chip" id="scoreTxt"></span><span class="chip" id="streakTxt"></span>
-        </div>
+        <h1 id="songTitle"></h1>
+        <div class="sub" id="songArtist"></div>
         <div class="tries" id="tries"></div>
+        <div class="pctrl">
+          <button class="round-btn" id="hint2" data-icon="bulb" aria-label="Hint: show artist (halves points)" title="Hint: show artist (halves points)"></button>
+          <button class="bigplay" id="play2" aria-label="Play clip (Space)" title="Play clip (Space)"></button>
+          <button class="round-btn" id="skip3" data-icon="next" aria-label="Skip for more time" title="Skip for more time"></button>
+        </div>
         <div class="guess" id="typeBox">
-          <div class="ac"><input id="guess" placeholder="Type the song title…" autocomplete="off" aria-label="Your guess"></div>
+          <div class="ac search"><span class="sicon" data-icon="search"></span><input id="guess" placeholder="Know it? Search for the title…" autocomplete="off" aria-label="Your guess"></div>
           <button class="cta" id="submit">Guess</button>
         </div>
         <div id="choices"></div>
@@ -241,8 +259,8 @@
         <div class="actions">
           <button class="ghost" id="skip2"></button><button class="ghost" id="giveup">Give up</button>
           <button class="cta" id="nextBtn" hidden></button>
-          <span class="sub" style="font-size:13px">Space / Shift+Space: play · Enter on empty: skip</span>
         </div>
+        <p class="sub keys">Space / Shift+Space: play · Enter on empty box: skip</p>
       </div>
     </section>
 
@@ -359,15 +377,21 @@ console.assert(!matches('love', 'Lovely'), 'rejects different short title');
 console.assert(rng(5)() === rng(5)(), 'seeded rng is deterministic');
 
 // JSONP: iTunes search CORS is unreliable, script tag always works.
-function itunes(params) {
+function jsonp(url, params) {
   return new Promise((ok, fail) => {
     const cb = 'cb' + Math.random().toString(36).slice(2), s = document.createElement('script');
-    window[cb] = d => { delete window[cb]; s.remove(); ok(d.results); };
-    s.onerror = () => { delete window[cb]; s.remove(); fail(new Error('Network error')); };
-    s.src = 'https://itunes.apple.com/search?' + new URLSearchParams({ media:'music', entity:'song', limit:200, callback:cb, ...params });
+    const end = () => { window[cb] = () => {}; s.remove(); clearTimeout(t); }; // noop: a late reply must not throw
+    const t = setTimeout(() => { end(); fail(new Error('Timeout')); }, 8000);
+    window[cb] = d => { end(); ok(d); };
+    s.onerror = () => { end(); fail(new Error('Network error')); };
+    s.src = url + '?' + new URLSearchParams({ ...params, callback:cb });
     document.head.append(s);
   });
 }
+const itunes = p => jsonp('https://itunes.apple.com/search', { media:'music', entity:'song', limit:200, ...p }).then(d => d.results);
+// Deezer only for artist photos/suggestions (iTunes has no artist images); iTunes is the fallback.
+const deezer = (path, p) => jsonp('https://api.deezer.com/' + path, { output:'jsonp', ...p }).then(d => d.error ? Promise.reject(d.error) : d.data);
+const artistPic = name => deezer('search/artist', { q:name, limit:1 }).then(d => d[0]?.picture_big);
 
 // ---------- autocomplete (artist search + guess box) ----------
 function autocomplete(input, source, onPick, ico) {
@@ -376,12 +400,13 @@ function autocomplete(input, source, onPick, ico) {
   const close = () => { items = []; idx = -1; render(); };
   const render = () => {
     const q = input.value.trim().toLowerCase();
-    list.replaceChildren(...items.map((s, i) => {
-      const li = make('li', i === idx ? 'on' : '');
-      li.innerHTML = icon(ico, 16);
+    list.replaceChildren(...items.map((it, i) => {
+      const li = make('li', i === idx ? 'on' : ''), s = it.label;
+      if (it.img) li.append(Object.assign(new Image(), { src:it.img, alt:'', className:it.round ? 'r' : '' })); else li.innerHTML = icon(ico, 16);
       const at = s.toLowerCase().indexOf(q), span = make('span');
       if (q && at >= 0) span.append(s.slice(0, at), make('mark', '', s.slice(at, at + q.length)), s.slice(at + q.length)); else span.textContent = s;
       li.append(span);
+      if (it.sub) li.append(make('small', '', it.sub));
       li.onmousedown = e => { e.preventDefault(); pick(s); };
       return li;
     }));
@@ -397,16 +422,23 @@ function autocomplete(input, source, onPick, ico) {
   });
   input.addEventListener('keydown', e => {
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && items.length) { e.preventDefault(); idx = (idx + (e.key === 'ArrowDown' ? 1 : -1) + items.length + (idx < 0 && e.key === 'ArrowUp' ? 1 : 0)) % items.length; render(); }
-    else if (e.key === 'Enter') { e.preventDefault(); if (idx >= 0) pick(items[idx]); else { seq++; clearTimeout(t); close(); onPick(input.value.trim(), true); } }
+    else if (e.key === 'Enter') { e.preventDefault(); if (idx >= 0) pick(items[idx].label); else { seq++; clearTimeout(t); close(); onPick(input.value.trim(), true); } }
     else if (e.key === 'Escape') close();
   });
   input.addEventListener('blur', close);
   return close;
 }
 // rank: starts-with first, then contains, then whatever iTunes thinks is closest
-const rank = (names, q) => { const l = q.toLowerCase(), k = n => n.toLowerCase() === l ? -1 : n.toLowerCase().startsWith(l) ? 0 : n.toLowerCase().includes(l) ? 1 : 2; return [...new Set(names)].sort((a, b) => k(a) - k(b)); };
-const artistSource = async q => rank((await itunes({ term:q, entity:'musicArtist', limit:15 })).map(a => a.artistName), q).slice(0, 7);
-const titleSource = async q => { const n = norm(q); return n ? rank(G.pool.map(t => t.trackName).filter(t => norm(t).includes(n)), q).slice(0, 7) : []; };
+const rank = (items, q) => {
+  const l = q.toLowerCase(), k = ({ label:n }) => n.toLowerCase() === l ? -1 : n.toLowerCase().startsWith(l) ? 0 : n.toLowerCase().includes(l) ? 1 : 2, seen = new Set();
+  return items.filter(it => !seen.has(it.label) && seen.add(it.label)).sort((a, b) => k(a) - k(b));
+};
+const fans = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M fans' : n >= 1e3 ? Math.round(n / 1e3) + 'K fans' : '';
+const artistSource = async q => {
+  try { return rank((await deezer('search/artist', { q, limit:12 })).map(a => ({ label:a.name, img:a.picture_medium, sub:fans(a.nb_fan), round:true })), q).slice(0, 7); }
+  catch { return rank((await itunes({ term:q, entity:'musicArtist', limit:15 })).map(a => ({ label:a.artistName })), q).slice(0, 7); }
+};
+const titleSource = async q => { const n = norm(q); return n ? rank(G.pool.filter(t => norm(t.trackName).includes(n)).map(t => ({ label:t.trackName, img:t.artworkUrl60 || t.artworkUrl100 })), q).slice(0, 7) : []; };
 
 // ---------- navigation ----------
 const VIEWS = ['home', 'custom', 'loading', 'game', 'end', 'stats'];
@@ -425,17 +457,27 @@ document.addEventListener('click', e => { const g = e.target.closest('[data-go]'
 
 // ---------- home / custom / stats ----------
 const mkCfg = extra => ({ rounds:+prefs.rounds, mode:prefs.mode, start:prefs.start, artist:'', genre:'', decade:'', ...extra });
-function card(title, sub, onClick, round) {
+function card(title, sub, onClick, round, imgs) {
   const c = make('div', 'card'); c.tabIndex = 0; c.role = 'button';
-  const cov = make('div', 'cover' + (round ? ' round' : ''), round ? title.split(' ').map(w => w[0]).join('').slice(0, 2) : title);
+  const cov = make('div', 'cover' + (round ? ' round' : '')), mos = make('div', 'mosaic'), t = make('span', 't', round ? title.split(' ').map(w => w[0]).join('').slice(0, 2) : title);
+  cov.append(mos, t);
   cov.style.setProperty('--h', hash(title) % 360);
+  imgs?.then(urls => {
+    urls = urls.filter(Boolean); if (!urls.length) return;
+    const n = urls.length < 4 ? 1 : 4;
+    mos.classList.toggle('one', n === 1);
+    mos.replaceChildren(...urls.slice(0, n).map(src => Object.assign(new Image(), { src, alt:'' })));
+    if (round) t.hidden = true;
+  }).catch(() => {}); // no images = keep gradient cover
   const fab = make('span', 'fab'); fab.innerHTML = icon('play', 24); cov.append(fab);
   c.append(cov, make('b', '', title), make('small', '', sub));
   c.onclick = onClick; c.onkeydown = e => e.key === 'Enter' && onClick();
   return c;
 }
-$('quick').append(...QUICK.map(([name, desc, cfg]) => card(name, desc, () => startGame(mkCfg({ ...cfg, label:name, from:'home' })))));
-$('artists').append(...ARTISTS.map(a => card(a, 'Artist', () => startGame(mkCfg({ artist:a, label:a, from:'home' })), true)));
+const coverArt = term => itunes({ term, limit:8 }).then(r => [...new Set(r.map(t => t.artworkUrl100.replace('100x100', '200x200')))]);
+$('quick').append(...QUICK.map(([name, desc, cfg]) => card(name, desc, () => startGame(mkCfg({ ...cfg, label:name, from:'home' })), false,
+  coverArt(cfg.decade ? cfg.decade + 's hits' : cfg.genre ? cfg.genre + ' hits' : 'top hits'))));
+$('artists').append(...ARTISTS.map(a => card(a, 'Artist', () => startGame(mkCfg({ artist:a, label:a, from:'home' })), true, artistPic(a).then(u => [u]))));
 
 function renderHome() {
   const h = new Date().getHours(), played = store.get('gts-daily-' + today(), null);
@@ -477,6 +519,7 @@ function renderRecent() {
   $('recent').replaceChildren(...games.map(g => {
     const b = make('button', 'ritem'), sq = make('span', 'sq'), d = make('div');
     sq.style.setProperty('--h', hash(g.label) % 360);
+    if (g.art) sq.append(Object.assign(new Image(), { src:g.art, alt:'', style:'width:100%;height:100%;object-fit:cover' }));
     d.append(make('b', '', g.label), make('small', '', `${g.score} pts · ${g.correct}/${g.total} correct`));
     b.append(sq, d);
     b.onclick = () => leaveOk() && startGame({ ...g.cfg, from:'home' });
@@ -539,7 +582,8 @@ function next() {
   const nxt = G.queue[G.round]; if (nxt) Object.assign(new Audio(), { preload:'auto', src:nxt.previewUrl }); // warm cache
   document.body.style.setProperty('--hue', Math.floor(Math.random() * 360));
   $('art').innerHTML = $('miniArt').innerHTML = EQ;
-  $('gLabel').textContent = G.cfg.label.toUpperCase();
+  $('gbg').style.backgroundImage = '';
+  $('gLabel').textContent = (G.cfg.daily ? 'DAILY CHALLENGE · ' : 'PLAYING · ') + G.cfg.label.toUpperCase();
   $('songTitle').textContent = 'Song ' + G.round;
   $('songArtist').textContent = 'Unknown artist · listen and guess';
   $('guess').value = ''; $('result').replaceChildren();
@@ -550,7 +594,8 @@ function next() {
     const b = make('button', 'choice'), d = make('div');
     b.song = t;
     d.append(make('b', '', t.trackName), make('small', '', t.artistName)); // textContent: API strings not trusted as HTML
-    b.append(make('span', 'n', i + 1), d);
+    const n = make('span', 'n'); n.append(Object.assign(new Image(), { src:t.artworkUrl100, alt:'' }));
+    b.append(n, d);
     b.onclick = () => { if (done) return; if (t === song) return win(); b.classList.add('bad'); b.disabled = true; miss('✗ ' + t.trackName); };
     $('choices').append(b);
   });
@@ -568,7 +613,7 @@ function draw() {
   $('unlocked').style.width = (done ? 100 : CLIPS[step] / MAX * 100) + '%';
   $('track').classList.toggle('done', done);
   $('endT').textContent = done ? '30s' : MAX + 's';
-  $('hint').disabled = hinted || done; $('skip').disabled = done;
+  $('hint').disabled = $('hint2').disabled = hinted || done; $('skip').disabled = $('skip3').disabled = done;
   $('attempts').replaceChildren(...attempts.map(a => make('li', a.startsWith('✗') ? '' : 'skip', a)));
   $('miniTitle').textContent = done ? song.trackName : `Song ${G.round} of ${G.total}`;
   $('miniArtist').textContent = done || hinted ? song.artistName : `${CLIPS[step]}s unlocked · ${worth()} pts`;
@@ -627,6 +672,7 @@ function reveal(w, pts, msg) {
   for (const b of $('choices').children) { b.disabled = true; if (b.song === song) b.classList.add('good'); }
   $('typeBox').hidden = $('skip2').hidden = $('giveup').hidden = true;
   const big = song.artworkUrl100.replace('100x100', '600x600');
+  if (/^https:\/\//.test(big)) $('gbg').style.backgroundImage = `url(${JSON.stringify(big)})`;
   for (const [id, src] of [['art', big], ['miniArt', song.artworkUrl100]]) { const img = new Image(); img.alt = ''; img.src = src; $(id).replaceChildren(img); }
   $('songTitle').textContent = song.trackName;
   $('songArtist').textContent = [song.artistName, song.collectionName, song.releaseDate?.slice(0, 4)].filter(Boolean).join(' • ');
@@ -645,7 +691,7 @@ function finish() {
   const h = G.history, correct = h.filter(x => x.pts).length, secs = sum(h.filter(x => x.secs != null).map(x => x.secs));
   const games = store.get('gts-games', []);
   const prevBest = games.length ? Math.max(...games.map(g => g.score)) : 0;
-  games.unshift({ date:Date.now(), label:G.cfg.label, score:G.score, correct, total:G.total, secs, bestStreak:G.bestStreak, cfg:G.cfg });
+  games.unshift({ date:Date.now(), label:G.cfg.label, score:G.score, correct, total:G.total, secs, bestStreak:G.bestStreak, cfg:G.cfg, art:G.queue[0]?.artworkUrl100 });
   store.set('gts-games', games.slice(0, 100));
   if (G.cfg.daily && store.get('gts-daily-' + G.cfg.daily, null) == null) store.set('gts-daily-' + G.cfg.daily, G.score);
   $('eLabel').textContent = G.cfg.label.toUpperCase();
@@ -669,9 +715,9 @@ function finish() {
 
 $('play').onclick = $('play2').onclick = togglePlay;
 $('submit').onclick = () => submit($('guess').value.trim());
-$('skip').onclick = $('skip2').onclick = () => !done && miss('Skipped');
+$('skip').onclick = $('skip2').onclick = $('skip3').onclick = () => !done && miss('Skipped');
 $('giveup').onclick = () => { if (!done) { attempts.push('Gave up'); lose('Gave up'); } };
-$('hint').onclick = () => { if (done) return; hinted = true; draw(); toast('Artist revealed — points halved'); };
+$('hint').onclick = $('hint2').onclick = () => { if (done) return; hinted = true; draw(); toast('Artist revealed — points halved'); };
 $('nextBtn').onclick = next;
 $('again').onclick = () => startGame(G.cfg);
 $('share').onclick = () => {
