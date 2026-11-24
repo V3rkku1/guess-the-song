@@ -356,10 +356,10 @@ const FI_ARTISTS = ['Käärijä','JVG','Antti Tuisku','Haloo Helsinki!','Erika V
 const FI_WORDS = ['rakkaus','yö','kesä','sydän','tanssi','koti','ikuisesti','sinä','elämä','kaunis','kuu','tyttö','unelma','juhla'];
 const FI_QUICK = [
   ['Suomi-hitit', 'Kotimaiset hitit laidasta laitaan', { country:'FI', terms:FI_WORDS }],
-  ['Suomipop', 'Radiohitit ja singalongit', { country:'FI', terms:['Antti Tuisku','Sanni','Erika Vikman','Isac Elliot','BEHM','Vesala','Juha Tapio','Arttu Wiskari','Käärijä','Chisu','Kaija Koo','Jenni Vartiainen'] }],
-  ['Suomirap', 'Riimit suomeksi', { country:'FI', terms:['JVG','Cheek','Elastinen','Gettomasa','Mikael Gabriel','Pyhimys','Etta','Sexmane','Ibe','Averagekidluke'] }],
-  ['Suomirock', 'Kitarat kaakkoon', { country:'FI', terms:['Apulanta','Eppu Normaali','Popeda','Yö','Kolmas Nainen','Nightwish','HIM','The Rasmus','Sunrise Avenue','Haloo Helsinki!','Happoradio','PMMP'] }],
-  ['Iskelmä', 'Lavatanssit ja klassikot', { country:'FI', terms:['Topi Sorsakoski','Katri Helena','Jari Sillanpää','Kari Tapio','Arja Koriseva','Eino Grön','Matti ja Teppo'] }],
+  ['Suomipop', 'Radiohitit ja singalongit', { country:'FI', byArtist:true, terms:['Antti Tuisku','Sanni','Erika Vikman','Isac Elliot','BEHM','Vesala','Juha Tapio','Arttu Wiskari','Käärijä','Chisu','Kaija Koo','Jenni Vartiainen'] }],
+  ['Suomirap', 'Riimit suomeksi', { country:'FI', byArtist:true, terms:['JVG','Cheek','Elastinen','Gettomasa','Mikael Gabriel','Pyhimys','Etta','Sexmane','Ibe','Averagekidluke'] }],
+  ['Suomirock', 'Kitarat kaakkoon', { country:'FI', byArtist:true, terms:['Apulanta','Eppu Normaali','Popeda','Yö','Kolmas Nainen','Nightwish','HIM','The Rasmus','Sunrise Avenue','Haloo Helsinki!','Happoradio','PMMP'] }],
+  ['Iskelmä', 'Lavatanssit ja klassikot', { country:'FI', byArtist:true, terms:['Topi Sorsakoski','Katri Helena','Jari Sillanpää','Kari Tapio','Arja Koriseva','Eino Grön','Matti ja Teppo'] }],
 ];
 const ARTISTS = ['Taylor Swift','Queen','Drake','The Weeknd','Eminem','ABBA','Michael Jackson','Billie Eilish','Coldplay','Ed Sheeran','Rihanna','Metallica'];
 const ICONS = {
@@ -416,6 +416,10 @@ console.assert(matches('bohemian rapsody', 'Bohemian Rhapsody'), 'tolerates typo
 console.assert(!matches('love', 'Lovely'), 'rejects different short title');
 console.assert(matches('cha cha cha', 'Cha Cha Cha') && matches('tytot tykkaa', 'Tytöt tykkää'), 'ä/ö typed as a/o');
 console.assert(matches('사랑', '사랑'), 'non-Latin titles still match');
+// each credited artist on a track: "JVG & Käärijä feat. X" -> ['jvg', 'kaarija', 'x']
+const credited = n => fold(n).split(/\s*(?:,|&|\+|\bfeat\.?|\bft\.?|\bwith\b|\bx\b)\s*/).map(s => s.trim());
+console.assert(credited('Ares & JVG').includes('ares') && credited('Cheek feat. Ares').includes('ares'), 'finds collab artists');
+console.assert(!credited('Lares').includes('ares') && !credited('Antares Band').includes('ares'), 'no partial-name matches');
 console.assert(rng(5)() === rng(5)(), 'seeded rng is deterministic');
 
 // JSONP: iTunes search CORS is unreliable, script tag always works.
@@ -599,15 +603,27 @@ $('reset').onclick = () => { if (confirm('Delete all your stats?')) { store.set(
 async function buildPool(cfg, r) {
   const { artist, genre, decade, country = 'US' } = cfg;
   let terms, extra = { country };
+  if (cfg.terms?.length && cfg.byArtist) { // playlist made of artist names: only songs credited to one of them
+    const picked = shuffle(cfg.terms, r).slice(0, 4), want = picked.map(fold);
+    const res = (await Promise.all(picked.map(term => itunes({ term, attribute:'artistTerm', country }).catch(() => [])))).flat();
+    return finishPool(res.filter(t => credited(t.artistName).some(a => want.includes(a))), cfg);
+  }
   if (cfg.terms?.length) terms = shuffle(cfg.terms, r).slice(0, 4);
   else if (artist) {
     // artist missing from one store? try the others (Finnish artists are often thin in the US store)
-    const byArtist = t => fold(t.artistName).includes(fold(artist));
+    const want = fold(artist).trim(), isExact = t => fold(t.artistName) === want;
     let res = [];
     for (const c of [...new Set([country, 'FI', 'US'])]) {
-      res = res.concat((await itunes({ term:artist, attribute:'artistTerm', country:c }).catch(() => [])).filter(byArtist));
-      if (res.length >= 12) break;
+      res = res.concat((await itunes({ term:artist, attribute:'artistTerm', country:c }).catch(() => [])).filter(t => fold(t.artistName).includes(want)));
+      if (res.filter(isExact).length >= 12) break;
     }
+    const exact = res.filter(isExact);
+    if (exact.length) {
+      // several artists can share a name: keep the one with the most songs, plus collabs crediting the name
+      const n = {}; for (const t of exact) n[t.artistId] = (n[t.artistId] || 0) + 1;
+      const id = Object.keys(n).sort((a, b) => n[b] - n[a])[0];
+      res = res.filter(t => String(t.artistId) === id || (!isExact(t) && credited(t.artistName).includes(want)));
+    } // else: typed a partial name ("taylor"), keep the loose match so the game still starts
     return finishPool(res, cfg);
   }
   else if (genre) terms = [genre, genre + ' hits', genre + ' classics'];
@@ -804,7 +820,7 @@ $('challenge').onclick = () => copy(challengeUrl(), 'Challenge link copied — y
 function copy(text, ok) {
   (navigator.clipboard?.writeText(text) ?? Promise.reject()).then(() => toast(ok), () => prompt('Copy this:', text));
 }
-const CFG_KEYS = ['rounds', 'mode', 'start', 'country', 'artist', 'genre', 'decade', 'terms', 'daily', 'label', 'seed'];
+const CFG_KEYS = ['rounds', 'mode', 'start', 'country', 'artist', 'genre', 'decade', 'terms', 'byArtist', 'daily', 'label', 'seed'];
 const challengeUrl = () => location.href.split('#')[0] + '#play=' + encodeURIComponent(JSON.stringify(Object.fromEntries(CFG_KEYS.map(k => [k, G.cfg[k]]))));
 function readChallenge() { // trust boundary: hash comes from anyone, so whitelist every field
   const m = location.hash.match(/^#play=(.+)$/); if (!m) return null;
@@ -817,6 +833,7 @@ function readChallenge() { // trust boundary: hash comes from anyone, so whiteli
       artist: str(c.artist, 60), genre: GENRES.includes(c.genre) ? c.genre : '', decade: DECADES.includes(c.decade) ? c.decade : '',
       daily: /^\d{4}-\d{2}-\d{2}$/.test(c.daily) ? c.daily : '', label: str(c.label, 40) || 'Challenge',
       country: /^[A-Z]{2}$/.test(c.country) ? c.country : 'US',
+      byArtist: c.byArtist === true,
       terms: Array.isArray(c.terms) ? c.terms.filter(t => typeof t === 'string').slice(0, 15).map(t => t.slice(0, 40)) : undefined,
       seed: Number.isInteger(c.seed) ? c.seed : undefined, challenge: true, from: 'home',
     });
