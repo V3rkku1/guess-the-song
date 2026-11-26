@@ -239,7 +239,7 @@
       <div class="body">
         <h2>Quick play</h2><div class="grid" id="quick"></div>
         <h2>Popular artists</h2><div class="grid" id="artists"></div>
-        <h2>TV &amp; anime themes</h2><div class="grid" id="shows"></div>
+        <h2>TV, anime &amp; game themes</h2><div class="grid" id="shows"></div>
         <h2>Suomi 🇫🇮</h2><div class="grid" id="fiQuick"></div>
         <h2>Suomalaiset artistit</h2><div class="grid" id="fiArtists"></div>
         <p class="sub" style="margin-top:32px">Playing with: <span id="prefTxt"></span> · <button class="link" data-go="custom">change</button></p>
@@ -385,12 +385,21 @@ const SHOWS = {
     ['Pokémon','Pokemon Theme Jason Paige'],['One Piece','We Are Hiroshi Kitadani'],['My Hero Academia','The Day Porno Graffitti'],['Jujutsu Kaisen','Kaikai Kitan Eve'],
     ['Cowboy Bebop','Tank! Seatbelts'],['Fullmetal Alchemist: Brotherhood','Again YUI'],['Sailor Moon','Moonlight Densetsu'],['Chainsaw Man','Kick Back Kenshi Yonezu'],
     ['Spy x Family','Mixed Nuts Official HIGE DANdism'],['One Punch Man','The Hero JAM Project'],['Sword Art Online','Crossing Field LiSA'],['Bleach','Asterisk Orange Range'],
-    ['Hunter x Hunter','Departure Masatoshi Ono']],
+    ['Hunter x Hunter','Departure Masatoshi Ono'],
+    ["Fairy Tail","Snow Fairy Funkist"],["Code Geass","Colors Flow"],["Steins;Gate","Hacking to the Gate Kanako Ito"],["Mob Psycho 100","99 MOB CHOIR"],
+    ["Haikyu!!","Imagination SPYAIR"],["Vinland Saga","Mukanjyo Survive Said The Prophet"],["Black Clover","Haruka Mirai Kankaku Piero"],["Frieren","Yuusha YOASOBI"],
+    ["Oshi no Ko","Idol YOASOBI"],["Bocchi the Rock!","Seishun Complex Kessoku Band"],["Your Lie in April","Hikaru Nara Goose house"],
+    ["Dr. Stone","Good Morning World BURNOUT SYNDROMES"],["Fire Force","Inferno Mrs. GREEN APPLE"],["Solo Leveling","LEveL SawanoHiroyuki TOMORROW X TOGETHER"],
+    ["Blue Lock","Chaos ga Kiwamaru UNISON SQUARE GARDEN"],["Kaguya-sama: Love Is War","Love Dramatic Masayuki Suzuki"]],
   kids: [['SpongeBob SquarePants','SpongeBob SquarePants Theme'],['PAW Patrol','PAW Patrol Theme'],['Peppa Pig','Peppa Pig Theme'],['Phineas and Ferb','Phineas and Ferb Theme Bowling for Soup'],
     ['DuckTales','DuckTales Theme'],['Teenage Mutant Ninja Turtles','Teenage Mutant Ninja Turtles Theme'],['Scooby-Doo','Scooby Doo Where Are You Theme'],['Bluey','Bluey Theme Tune'],
     ['Thomas & Friends','Thomas the Tank Engine Theme'],['Power Rangers','Go Go Power Rangers'],['The Fairly OddParents','Fairly OddParents Theme'],['Adventure Time','Adventure Time Theme'],
     ['Gravity Falls','Gravity Falls Main Title'],['Hannah Montana','Best of Both Worlds Hannah Montana'],['Miraculous','Miraculous Ladybug Theme'],['Bob the Builder','Can We Fix It Bob the Builder'],
-    ['Teletubbies','Teletubbies Say Eh-Oh'],['Avatar: The Last Airbender','Avatar The Last Airbender Main Title']],
+    ['Teletubbies','Teletubbies Say Eh-Oh'],['Avatar: The Last Airbender','Avatar The Last Airbender Main Title'],
+    ["Arthur","Believe in Yourself Ziggy Marley"],["Dora the Explorer","Dora the Explorer Theme"],["Sesame Street","Sesame Street Theme"],["Pingu","Pingu Theme"],
+    ["Postman Pat","Postman Pat Theme"],["Fireman Sam","Fireman Sam Theme"],["The Powerpuff Girls","Powerpuff Girls Theme"],
+    ["Kim Possible","Call Me Beep Me Christina Milian"],["Dexter's Laboratory","Dexter's Laboratory Theme"],["Ben 10","Ben 10 Theme"],["Pocoyo","Pocoyo Theme"],
+    ["Rugrats","Rugrats Theme"],["Hey Arnold!","Hey Arnold Theme"]],
   tv: [['Breaking Bad','Breaking Bad Main Title Theme'],['Game of Thrones','Game of Thrones Main Title Ramin Djawadi'],['Stranger Things','Stranger Things Main Title'],
     ['Friends',"I'll Be There for You The Rembrandts"],['The Simpsons','The Simpsons Main Title Theme'],['The Office','The Office Theme'],['Succession','Succession Main Title Theme'],
     ['The Sopranos','Woke Up This Morning Alabama 3'],['Peaky Blinders','Red Right Hand Nick Cave'],['The Walking Dead','The Walking Dead Main Title Theme'],
@@ -398,9 +407,29 @@ const SHOWS = {
     ['Wednesday','Wednesday Main Titles Danny Elfman'],['House of the Dragon','House of the Dragon Main Title Theme'],['The Last of Us','The Last of Us Gustavo Santaolalla'],
     ['The Fresh Prince of Bel-Air','Fresh Prince of Bel-Air Theme'],['Twin Peaks','Twin Peaks Theme Angelo Badalamenti'],['The X-Files','The X-Files Theme Mark Snow'],
     ['Dexter','Dexter Main Title Theme'],['Narcos','Tuyo Rodrigo Amarante'],['The Big Bang Theory','The History of Everything Barenaked Ladies'],
-    ['How I Met Your Mother','Hey Beautiful The Solids'],['Squid Game','Way Back Then Squid Game']],
+    ['How I Met Your Mother','Hey Beautiful The Solids'],['Squid Game','Way Back Then Squid Game'],
+    ["The Witcher","Toss a Coin to Your Witcher"],["The Crown","The Crown Main Title Hans Zimmer"],["Mad Men","A Beautiful Mine RJD2"],
+    ["True Detective","Far from Any Road Handsome Family"],["Downton Abbey","Downton Abbey Suite John Lunn"],["Sherlock","Sherlock Main Theme"],
+    ["Doctor Who","Doctor Who Theme"],["Seinfeld","Seinfeld Theme"],["Scrubs","Superman Lazlo Bane"],["Gilmore Girls","Where You Lead Carole King"],
+    ["Grey's Anatomy","Cosy in the Rocket Psapp"],["Money Heist","My Life Is Going On Cecilia Krull"],["Dark","Goodbye Apparat Soap Skin"],
+    ["Vikings","If I Had a Heart Fever Ray"],["Suits","Greenback Boogie Ima Robot"],["Arcane","Enemy Imagine Dragons"],
+    ["Prison Break","Prison Break Main Title Ramin Djawadi"],["Smallville","Save Me Remy Zero"],["The O.C.","California Phantom Planet"],
+    ["House","Teardrop Massive Attack"],["Cheers","Where Everybody Knows Your Name Gary Portnoy"],["Full House","Everywhere You Look Jesse Frederick"],
+    ["One Tree Hill","I Don't Want to Be Gavin DeGraw"],["Weeds","Little Boxes Malvina Reynolds"],["Rick and Morty","Rick and Morty Theme"]],
+  games: [
+    ["Super Mario Bros.","Super Mario Bros Ground Theme"],["The Legend of Zelda","Legend of Zelda Main Theme Koji Kondo"],["Tetris","Tetris Theme Korobeiniki"],
+    ["Minecraft","Sweden C418"],["Halo","Halo Theme Martin O'Donnell"],["Skyrim","Dragonborn Jeremy Soule"],["Final Fantasy VII","One-Winged Angel Nobuo Uematsu"],
+    ["Sonic the Hedgehog","Green Hill Zone Sonic"],["Undertale","Megalovania Toby Fox"],["The Witcher 3","Geralt of Rivia Marcin Przybylowicz"],
+    ["Pac-Man","Pac-Man Theme"],["Street Fighter II","Guile Theme Street Fighter"],["Super Smash Bros. Brawl","Super Smash Bros Brawl Main Theme"],
+    ["Animal Crossing: New Horizons","Animal Crossing New Horizons Main Theme"],["Wii Sports","Wii Sports Theme"],["Doom (2016)","BFG Division Mick Gordon"],
+    ["Portal","Still Alive Jonathan Coulton"],["Assassin's Creed II","Ezio's Family Jesper Kyd"],["God of War","God of War Bear McCreary"],
+    ["Red Dead Redemption 2","That's the Way It Is Daniel Lanois"],["GTA: San Andreas","Grand Theft Auto San Andreas Theme"],
+    ["Kingdom Hearts","Simple and Clean Utada Hikaru"],["Hollow Knight","Hollow Knight Christopher Larkin"],["Celeste","Resurrections Lena Raine"],
+    ["Among Us","Among Us Theme"],["Call of Duty: Modern Warfare 2","Modern Warfare 2 Theme Hans Zimmer"],["Mega Man 2","Dr. Wily Stage Mega Man 2"],
+    ["Donkey Kong Country","Aquatic Ambience David Wise"],["Persona 5","Last Surprise Persona 5"],["Geometry Dash","Stereo Madness ForeverBound"],
+    ["Mario Kart","Mario Kart Theme"]],
 };
-const SHOW_CARDS = [['Anime Openings', 'Name the anime from its opening', 'anime'], ["Kids' Shows", 'Cartoon and kids TV intros', 'kids'], ['TV Series Themes', 'Breaking Bad, Friends, Game of Thrones…', 'tv']];
+const SHOW_CARDS = [['Anime Openings', 'Name the anime from its opening', 'anime'], ["Kids' Shows", 'Cartoon and kids TV intros', 'kids'], ['TV Series Themes', 'Breaking Bad, Friends, Game of Thrones…', 'tv'], ['Video Game Music', 'Mario, Zelda, Minecraft, Halo…', 'games']];
 const ARTISTS = ['Taylor Swift','Queen','Drake','The Weeknd','Eminem','ABBA','Michael Jackson','Billie Eilish','Coldplay','Ed Sheeran','Rihanna','Metallica'];
 const ICONS = {
   home:'M12 3 2 12h3v9h6v-6h2v6h6v-9h3z',
@@ -582,7 +611,7 @@ $('artists').append(...ARTISTS.map(a => card(a, 'Artist', () => startGame(mkCfg(
 const findTheme = (show, q, country) => cached(`gts-show-${country}-${q}`, () => itunes({ term:q, country, limit:10 }).then(res => {
   // prefer a result containing every search word (Unravel by TK, not Unravel by Björk); skip karaoke/8-bit/remix takes
   const words = fold(q).split(/\s+/).filter(w => w.length > 2).slice(0, 3), txt = t => fold(t.trackName + ' ' + t.collectionName + ' ' + t.artistName);
-  const ok = res.filter(t => t.previewUrl && !/karaoke|8.bit|remix|lullaby|ringtone|piano version|music box/i.test(t.trackName + ' ' + t.collectionName));
+  const ok = res.filter(t => t.previewUrl && !/karaoke|8.bit|remix|lullaby|ringtone|piano version|music box|a cappella|lo-?fi|metal version|dance mix|guide melody|off vocal/i.test(t.trackName + ' ' + t.collectionName));
   const t = ok.find(t => words.every(w => txt(t).includes(w))) || ok.find(t => words.some(w => txt(t).includes(w)));
   // the answer is the show; keep the real song title for the reveal
   return t ? { trackId:t.trackId, trackName:show, collectionName:t.trackName, artistName:t.artistName, previewUrl:t.previewUrl, artworkUrl100:t.artworkUrl100, releaseDate:t.releaseDate, trackViewUrl:t.trackViewUrl } : null;
@@ -748,9 +777,10 @@ function next() {
   $('gbg').style.backgroundImage = '';
   $('gLabel').textContent = (G.cfg.daily ? 'DAILY CHALLENGE · ' : 'PLAYING · ') + G.cfg.label.toUpperCase();
   const isShow = !!SHOWS[G.cfg.shows];
-  $('songTitle').textContent = (isShow ? 'Show ' : 'Song ') + G.round;
-  $('songArtist').textContent = isShow ? 'Which series is this intro from?' : 'Unknown artist · listen and guess';
-  $('guess').placeholder = isShow ? 'Know it? Type the show name…' : 'Know it? Search for the title…';
+  $('songTitle').textContent = (G.cfg.shows === 'games' ? 'Game ' : isShow ? 'Show ' : 'Song ') + G.round;
+  const isGame = G.cfg.shows === 'games';
+  $('songArtist').textContent = isGame ? 'Which game is this music from?' : isShow ? 'Which series is this intro from?' : 'Unknown artist · listen and guess';
+  $('guess').placeholder = isGame ? 'Know it? Type the game…' : isShow ? 'Know it? Type the show name…' : 'Know it? Search for the title…';
   $('guess').value = ''; $('result').replaceChildren();
   $('typeBox').hidden = G.cfg.mode !== 'type';
   $('nextBtn').hidden = true; $('skip2').hidden = $('giveup').hidden = false;
