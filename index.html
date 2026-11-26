@@ -696,12 +696,14 @@ console.assert(alike('Love', 'Love You') && alike('Hello', 'Helo') && !alike('He
 // Only a tiny pool falls back to upcoming, then already-played songs.
 function choicesFor(song) {
   const inGame = new Set(G.queue.map(t => t.trackName));
-  const outside = [...G.pool.filter(t => !inGame.has(t.trackName)),
+  const outside = [...G.pool.filter(t => !inGame.has(t.trackName)), ...G.fillers,
     ...(SHOWS[G.cfg.shows] || []).filter(([n]) => !inGame.has(n)).map(([n]) => ({ trackName:n, artistName:'' }))];
-  const tiers = [shuffle(outside), shuffle(G.queue.slice(G.round)), shuffle(G.queue.slice(0, G.round - 1))];
+  const leastUsed = a => shuffle(a).sort((x, y) => (G.used.get(x.trackName) || 0) - (G.used.get(y.trackName) || 0)); // rotate, don't repeat the same 3
+  const tiers = [leastUsed(outside), shuffle(G.queue.slice(G.round)), shuffle(G.queue.slice(0, G.round - 1))];
   const out = [song];
   for (const strict of [true, false]) for (const tier of tiers) for (const t of tier)
     if (out.length < 4 && !out.some(o => o.trackName === t.trackName) && !(strict && out.some(o => alike(o.trackName, t.trackName)))) out.push(t);
+  for (const o of out.slice(1)) G.used.set(o.trackName, (G.used.get(o.trackName) || 0) + 1);
   return out;
 }
 const songKey = t => norm(t.trackName) + '|' + fold(t.artistName);
@@ -764,7 +766,15 @@ async function startGame(cfg) {
   const total = Math.min(cfg.rounds, pool.length);
   const seen = new Set(store.get('gts-seen', [])), mixed = shuffle(pool, r);
   const queue = (cfg.daily || cfg.challenge ? mixed : [...mixed.filter(t => !seen.has(songKey(t))), ...mixed.filter(t => seen.has(songKey(t)))]).slice(0, total);
-  G = { cfg, pool, total, queue, offsets:queue.map(() => cfg.start === 'rand' ? r() * (28 - MAX) : 0), round:0, score:0, streak:0, bestStreak:0, history:[] };
+  // multiple choice needs ~3 fresh wrong options per round; small pools (one artist) borrow same-genre songs
+  let fillers = [];
+  if (cfg.mode === 'mc' && !SHOWS[cfg.shows] && pool.length - total < total * 3) {
+    const have = new Set(pool.map(t => norm(t.trackName)));
+    fillers = (await itunes({ term:(pool[0].primaryGenreName || 'pop') + ' hits', country:cfg.country || 'US' }).then(firstN(100)).catch(() => []))
+      .filter(t => t.previewUrl && !JUNK.test(t.trackName + ' ' + t.collectionName) && !have.has(norm(t.trackName)));
+    if (my !== loadSeq) return;
+  }
+  G = { cfg, pool, fillers, used:new Map(), total, queue, offsets:queue.map(() => cfg.start === 'rand' ? r() * (28 - MAX) : 0), round:0, score:0, streak:0, bestStreak:0, history:[] };
   show('game'); next();
 }
 
@@ -795,7 +805,7 @@ function next() {
     const b = make('button', 'choice'), d = make('div');
     b.song = t;
     const show = !!SHOWS[G.cfg.shows]; // show options: name only, so art/performer can't single out the real one
-    d.append(make('b', '', t.trackName), make('small', '', show ? '' : t.artistName)); // textContent: API strings not trusted as HTML
+    d.append(make('b', '', t.trackName), make('small', '', show || G.cfg.artist ? '' : t.artistName)); // artist games: same artist anyway, and fillers would stand out // textContent: API strings not trusted as HTML
     const n = make('span', 'n', show ? '♪' : null); if (!show) n.append(Object.assign(new Image(), { src:t.artworkUrl100, alt:'' }));
     b.append(n, d);
     b.onclick = () => { if (done) return; if (t === song) return win(); b.classList.add('bad'); b.disabled = true; miss('✗ ' + t.trackName); };
