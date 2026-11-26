@@ -554,7 +554,21 @@ SHOWS.boybands = [
     ["Say My Name","Say My Name Destiny's Child"],["Pure Shores","Pure Shores All Saints"],["End of the Road","End of the Road Boyz II Men"],["Reach","Reach S Club 7"],
     ["C'est la vie (B*Witched)","C'est la vie B Witched"],["Tearin' Up My Heart","Tearin Up My Heart NSYNC"],["Spice Up Your Life","Spice Up Your Life Spice Girls"],
     ["Larger Than Life","Larger Than Life Backstreet Boys"],["Waterfalls","Waterfalls TLC"]];
-const SHOW_COUNTRY = { jojo:'JP', suomihitit:'FI', suomiklassikot:'FI', finrock:'FI' }; // store to search per category (entry's 3rd item overrides)
+// Japanese store: Super Eurobeat / m.o.v.e originals
+SHOWS.initiald = [
+    ["Rage Your Dream","Rage Your Dream move"],["Dogfight","Dogfight move"],["Break in2 the Nite","Break in2 the Nite move"],["Blazin' Beat","Blazin Beat move"],
+    ["Around the World","Around the World m.o.v.e"],["Deja Vu","Deja Vu Dave Rodgers"],["Gas Gas Gas","Gas Gas Gas Manuel"],
+    ["Running in the 90s","Running in the 90s Max Coveri"],["Night of Fire","Night of Fire Niko"],["Space Boy","Space Boy Dave Rodgers"],["The Top","The Top Ken Blast"],
+    ["Speedy Speed Boy","Speedy Speed Boy Marko Polo"],["No One Sleep in Tokyo","No One Sleep in Tokyo Edo Boys"],["Killing My Love","Killing My Love Leslie Parrish"],
+    ["Beat of the Rising Sun","Beat of the Rising Sun Dave Rodgers"]];
+SHOWS.eurobeat = [
+    ["Deja Vu","Deja Vu Dave Rodgers"],["Gas Gas Gas","Gas Gas Gas Manuel"],["Running in the 90s","Running in the 90s Max Coveri"],["Night of Fire","Night of Fire Niko"],
+    ["Space Boy","Space Boy Dave Rodgers"],["The Top","The Top Ken Blast"],["Beat of the Rising Sun","Beat of the Rising Sun Dave Rodgers"],
+    ["Speedy Speed Boy","Speedy Speed Boy Marko Polo"],["Boom Boom Dollar","Boom Boom Dollar King Kong D Jungle Girls"],
+    ["Don't Stop the Music","Don't Stop the Music Lou Grant"],["Burning Up for You","Burning Up for You Dave Rodgers"],["Get Me Power","Get Me Power Mega NRG Man"],
+    ["Night Fever","Night Fever Mega NRG Man Dave Rodgers"],["Take Me Like a Wild Boy","Take Me Like a Wild Boy Mega NRG Man"],
+    ["Killing My Love","Killing My Love Leslie Parrish"],["No One Sleep in Tokyo","No One Sleep in Tokyo Edo Boys"]];
+const SHOW_COUNTRY = { jojo:'JP', suomihitit:'FI', suomiklassikot:'FI', finrock:'FI', initiald:'JP', eurobeat:'JP' }; // store to search per category (entry's 3rd item overrides)
 // [title prefix, question, placeholder] per category
 const SHOW_TEXT = {
   anime:['Show', 'Which anime is this opening from?', 'Know it? Type the anime…'], kids:['Show', 'Which kids show is this intro from?', 'Know it? Type the show…'],
@@ -565,12 +579,14 @@ const SHOW_TEXT = {
   memes:['Song', 'Name the meme song!', 'Know it? Type the song…'], stadium:['Song', 'Name the stadium anthem!', 'Know it? Type the song…'],
   suomihitit:['Biisi', 'Mikä suomihitti tämä on?', 'Tiedätkö? Kirjoita biisin nimi…'], suomiklassikot:['Biisi', 'Mikä suomiklassikko tämä on?', 'Tiedätkö? Kirjoita biisin nimi…'],
   finrock:['Song', 'Name the Finnish rock or metal song!', 'Know it? Type the song…'], onehit:['Song', 'Name the one-hit wonder!', 'Know it? Type the song…'],
-  tiktok:['Song', 'Name the TikTok hit!', 'Know it? Type the song…'], boybands:['Song', 'Name the 90s pop hit!', 'Know it? Type the song…'],
+  tiktok:['Song', 'Name the TikTok hit!', 'Know it? Type the song…'],
+  initiald:['Song', 'Name the Initial D track!', 'Know it? Type the song…'], eurobeat:['Song', 'Name the Eurobeat track!', 'Know it? Type the song…'], boybands:['Song', 'Name the 90s pop hit!', 'Know it? Type the song…'],
 };
 const PARTY_CARDS = [['Eurovision', 'Winners and fan favourites', 'eurovision'], ['Christmas Songs', 'Jingle all the way', 'christmas'],
   ['Meme Songs', 'Rickrolls, Sandstorm, Coffin Dance…', 'memes'], ['Stadium Anthems', 'Songs crowds sing along to', 'stadium'],
   ['One-Hit Wonders', 'Macarena, Barbie Girl, Tubthumping…', 'onehit'], ['TikTok Hits', 'Songs that blew up online', 'tiktok'],
-  ['90s Boy Bands & Girl Groups', 'Backstreet Boys, Spice Girls, NSYNC…', 'boybands']];
+  ['90s Boy Bands & Girl Groups', 'Backstreet Boys, Spice Girls, NSYNC…', 'boybands'],
+  ['Initial D', 'Deja Vu, Gas Gas Gas, m.o.v.e…', 'initiald'], ['Eurobeat', 'Super Eurobeat classics', 'eurobeat']];
 const FI_CARDS = [['Suomihitit', 'Tämän päivän kotimaiset hitit', 'suomihitit'], ['Suomiklassikot', 'Eppu, Popeda, Kaija Koo, Loiri…', 'suomiklassikot'],
   ['Finnish Rock & Metal', 'Nightwish, HIM, The Rasmus…', 'finrock']];
 const SHOW_CARDS = [['Anime Openings', 'Name the anime from its opening', 'anime'], ["Kids' Shows", 'Cartoon and kids TV intros', 'kids'], ['TV Series Themes', 'Breaking Bad, Friends, Game of Thrones…', 'tv'], ['Video Game Music', 'Mario, Zelda, Minecraft, Halo…', 'games'],
@@ -850,12 +866,15 @@ console.assert(alike('Love', 'Love You') && alike('Hello', 'Helo') && !alike('He
 // Only a tiny pool falls back to upcoming, then already-played songs.
 // small categories borrow wrong options from similar ones (15 meme songs alone = same 3 every round)
 const SHOW_GROUPS = [['anime', 'kids', 'tv'], ['movies', 'disney'], ['memes', 'onehit', 'tiktok', 'stadium', 'boybands', 'eurovision'],
-  ['suomihitit', 'suomiklassikot', 'finrock']];
+  ['suomihitit', 'suomiklassikot', 'finrock'], ['initiald', 'eurobeat']];
 // extra wrong-option names (no audio needed) for categories with no similar category to borrow from
 const SHOW_DECOYS = { christmas: ['Jingle Bells','Silent Night',"Santa Claus Is Comin' to Town",'Frosty the Snowman','Winter Wonderland','Little Drummer Boy',
   'Blue Christmas','Run Rudolph Run','Rudolph the Red-Nosed Reindeer','Santa Baby','Christmas (Baby Please Come Home)',"Baby, It's Cold Outside",
   'Have Yourself a Merry Little Christmas','Deck the Halls','O Holy Night','The Christmas Song','Merry Xmas Everybody','Last Christmas Night',
   'Christmas Lights','Wonderful Dream (Holidays Are Coming)'] };
+SHOW_DECOYS.initiald = SHOW_DECOYS.eurobeat = ['Wings of Fire','Stop Your Self Control','Gamble Rumble','Noizy Tribe','Max Power','Golden Age','Super Eurobeat',
+  'Black Out','Remember Me','Love Is in Danger','Crazy for Love','Heartbeat','Fly Me So High','Grand Prix','Hot Desire','The Race Is Over','Mr. Mickey',
+  'Dancing in the Street','Rock Me Up','Wild Child'];
 function choicesFor(song) {
   const inGame = new Set(G.queue.map(t => t.trackName));
   const names = (keys, related) => keys.flatMap(k => SHOWS[k]).filter(([n]) => !inGame.has(n)).map(([n]) => ({ trackName:n, artistName:'', related }));
