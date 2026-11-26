@@ -692,10 +692,16 @@ $('reset').onclick = () => { if (confirm('Delete all your stats?')) { store.set(
 // 4 options whose titles don't look alike ("Love" vs "Love You"); tiny pools fall back to any song
 const alike = (a, b) => { const x = norm(a), y = norm(b); return !x || !y || x.includes(y) || y.includes(x) || lev(x, y) <= Math.max(x.length, y.length) / 3; };
 console.assert(alike('Love', 'Love You') && alike('Hello', 'Helo') && !alike('Hello', 'Yesterday'), 'alike');
+// Wrong options come from songs NOT in this game, so options never reveal past or upcoming answers.
+// Only a tiny pool falls back to upcoming, then already-played songs.
 function choicesFor(song) {
-  const out = [song], rest = shuffle(G.pool.filter(t => t !== song));
-  for (const t of rest) if (out.length < 4 && !out.some(o => alike(o.trackName, t.trackName))) out.push(t);
-  for (const t of rest) if (out.length < 4 && !out.includes(t)) out.push(t);
+  const inGame = new Set(G.queue.map(t => t.trackName));
+  const outside = [...G.pool.filter(t => !inGame.has(t.trackName)),
+    ...(SHOWS[G.cfg.shows] || []).filter(([n]) => !inGame.has(n)).map(([n]) => ({ trackName:n, artistName:'' }))];
+  const tiers = [shuffle(outside), shuffle(G.queue.slice(G.round)), shuffle(G.queue.slice(0, G.round - 1))];
+  const out = [song];
+  for (const strict of [true, false]) for (const tier of tiers) for (const t of tier)
+    if (out.length < 4 && !out.some(o => o.trackName === t.trackName) && !(strict && out.some(o => alike(o.trackName, t.trackName)))) out.push(t);
   return out;
 }
 const songKey = t => norm(t.trackName) + '|' + fold(t.artistName);
@@ -788,8 +794,9 @@ function next() {
   if (G.cfg.mode === 'mc') shuffle(choicesFor(song)).forEach((t, i) => {
     const b = make('button', 'choice'), d = make('div');
     b.song = t;
-    d.append(make('b', '', t.trackName), make('small', '', t.artistName)); // textContent: API strings not trusted as HTML
-    const n = make('span', 'n'); n.append(Object.assign(new Image(), { src:t.artworkUrl100, alt:'' }));
+    const show = !!SHOWS[G.cfg.shows]; // show options: name only, so art/performer can't single out the real one
+    d.append(make('b', '', t.trackName), make('small', '', show ? '' : t.artistName)); // textContent: API strings not trusted as HTML
+    const n = make('span', 'n', show ? '♪' : null); if (!show) n.append(Object.assign(new Image(), { src:t.artworkUrl100, alt:'' }));
     b.append(n, d);
     b.onclick = () => { if (done) return; if (t === song) return win(); b.classList.add('bad'); b.disabled = true; miss('✗ ' + t.trackName); };
     $('choices').append(b);
