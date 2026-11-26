@@ -260,7 +260,7 @@
       </div>
     </section>
 
-    <section id="loading" class="center" hidden><div class="spin"></div><div>Finding songs…</div></section>
+    <section id="loading" class="center" hidden><div class="spin"></div><div id="loadTxt">Finding songs…</div></section>
 
     <section id="game" hidden>
       <div class="gbg" id="gbg"></div>
@@ -512,7 +512,12 @@ const cached = (key, fn, ttl = 7 * 864e5) => {
   if (hit && Date.now() - hit.t < ttl) return Promise.resolve(hit.v);
   return fn().then(v => { store.set(key, { t:Date.now(), v }); return v; });
 };
-const itunes = p => once('it' + JSON.stringify(p), () => jsonp('https://itunes.apple.com/search', { media:'music', entity:'song', limit:200, lang:'en_us', ...p }).then(d => d.results));
+const itunesUrl = 'https://itunes.apple.com/search';
+const itunes = p => once('it' + JSON.stringify(p), () => {
+  const q = { media:'music', entity:'song', limit:200, lang:'en_us', ...p };
+  // one retry after a pause: iTunes briefly refuses when many searches happen at once
+  return jsonp(itunesUrl, q).catch(() => new Promise(ok => setTimeout(ok, 1500)).then(() => jsonp(itunesUrl, q))).then(d => d.results);
+});
 // Deezer only for artist photos/suggestions (iTunes has no artist images); iTunes is the fallback.
 const deezer = (path, p) => jsonp('https://api.deezer.com/' + path, { output:'jsonp', ...p }).then(d => d.error ? Promise.reject(d.error) : d.data);
 const artistPic = name => cached('gts-pic-' + name, () => deezer('search/artist', { q:name, limit:1 }).then(d => d[0]?.picture_big || ''));
@@ -702,7 +707,7 @@ function choicesFor(song) {
   const tiers = [leastUsed(outside), shuffle(G.queue.slice(G.round)), shuffle(G.queue.slice(0, G.round - 1))];
   const out = [song];
   for (const strict of [true, false]) for (const tier of tiers) for (const t of tier)
-    if (out.length < 4 && !out.some(o => o.trackName === t.trackName) && !(strict && out.some(o => alike(o.trackName, t.trackName)))) out.push(t);
+    if (out.length < 4 && !out.some(o => norm(o.trackName) === norm(t.trackName)) && !(strict && out.some(o => alike(o.trackName, t.trackName)))) out.push(t); // never the same song twice
   for (const o of out.slice(1)) G.used.set(o.trackName, (G.used.get(o.trackName) || 0) + 1);
   return out;
 }
@@ -748,7 +753,10 @@ const JUNK = /karaoke|tribute|made famous|in the style of|originally performed|i
 console.assert(JUNK.test('Hello (Karaoke Version)') && !JUNK.test('Hello'), 'junk filter');
 function finishPool(res, { genre, decade }) {
   res = res.filter(t => !JUNK.test([t.trackName, t.collectionName, t.artistName].join(' '))); // karaoke/cover albums are unguessable
-  if (genre) res = res.filter(t => (t.primaryGenreName || '').toLowerCase().includes(genre.toLowerCase().split(/[/&]/)[0]));
+  if (genre) { // 'R&B/Soul' -> r&b or soul, 'Hip-Hop/Rap' -> hip-hop or rap
+    const parts = genre.toLowerCase().split('/');
+    res = res.filter(t => parts.some(g => (t.primaryGenreName || '').toLowerCase().includes(g)));
+  }
   if (decade) res = res.filter(t => { const y = +t.releaseDate?.slice(0, 4); return y >= +decade && y < +decade + 10; });
   const seen = new Set();
   return res.filter(t => t.previewUrl && !seen.has(norm(t.trackName)) && seen.add(norm(t.trackName))).sort((a, b) => a.trackId - b.trackId);
@@ -760,9 +768,20 @@ async function startGame(cfg) {
   cfg.seed ??= Math.floor(Math.random() * 2 ** 31);
   const r = rng(cfg.daily ? hash(cfg.daily) : cfg.seed); // same seed (daily date / challenge link) = same songs
   let pool = [];
+  $('loadTxt').textContent = 'Finding songs…';
   try { pool = await buildPool(cfg, r); } catch {}
+  // strict filters (genre + decade…) can come back thin: search again with other random words
+  for (let i = 1; i <= 2 && pool.length < Math.min(cfg.rounds, 10) && !cfg.daily && !cfg.challenge && !cfg.artist && !cfg.terms && !SHOWS[cfg.shows]; i++) {
+    if (my !== loadSeq) return;
+    $('loadTxt').textContent = 'Finding more songs…';
+    const more = await buildPool(cfg, rng(cfg.seed + i)).catch(() => []), have = new Set(pool.map(songKey));
+    pool = [...pool, ...more.filter(t => !have.has(songKey(t)))];
+  }
   if (my !== loadSeq) return; // user navigated away while loading
-  if (pool.length < 4) { toast(pool.length ? 'Not enough songs — try looser filters' : 'No songs found (or no connection)'); return show(cfg.from || 'home'); }
+  if (pool.length < 4) {
+    toast(pool.length ? 'Not enough songs for these filters — try removing the decade or genre' : navigator.onLine ? 'Music search is busy — wait a moment and try again' : 'You are offline');
+    return show(cfg.from || 'home');
+  }
   const total = Math.min(cfg.rounds, pool.length);
   const seen = new Set(store.get('gts-seen', [])), mixed = shuffle(pool, r);
   const queue = (cfg.daily || cfg.challenge ? mixed : [...mixed.filter(t => !seen.has(songKey(t))), ...mixed.filter(t => seen.has(songKey(t)))]).slice(0, total);
