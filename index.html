@@ -244,6 +244,7 @@
         <h2>Quick play</h2><div class="grid" id="quick"></div>
         <h2>Popular artists</h2><div class="grid" id="artists"></div>
         <h2>Themes &amp; soundtracks</h2><div class="grid" id="shows"></div>
+        <h2>Party mix</h2><div class="grid" id="party"></div>
         <h2>Suomi 🇫🇮</h2><div class="grid" id="fiQuick"></div>
         <h2>Suomalaiset artistit</h2><div class="grid" id="fiArtists"></div>
         <p class="sub" style="margin-top:32px">Playing with: <span id="prefTxt"></span> · <button class="link" data-go="custom">change</button></p>
@@ -401,7 +402,11 @@ const SHOWS = {
     ["Haikyu!!","Imagination SPYAIR"],["Vinland Saga","Mukanjyo Survive Said The Prophet"],["Black Clover","Haruka Mirai Kankaku Piero"],["Frieren","Yuusha YOASOBI"],
     ["Oshi no Ko","Idol YOASOBI"],["Bocchi the Rock!","Seishun Complex Kessoku Band"],["Your Lie in April","Hikaru Nara Goose house"],
     ["Dr. Stone","Good Morning World BURNOUT SYNDROMES"],["Fire Force","Inferno Mrs. GREEN APPLE"],["Solo Leveling","LEveL SawanoHiroyuki TOMORROW X TOGETHER"],
-    ["Blue Lock","Chaos ga Kiwamaru UNISON SQUARE GARDEN"],["Kaguya-sama: Love Is War","Love Dramatic Masayuki Suzuki"]],
+    ["Blue Lock","Chaos ga Kiwamaru UNISON SQUARE GARDEN"],["Kaguya-sama: Love Is War","Love Dramatic Masayuki Suzuki"],
+    ["Demon Slayer: Entertainment District Arc","Zankyou Sanka Aimer"],["Akame ga Kill!","Skyreach Sora Amamiya"],
+    ["Parasyte","Let Me Hear Fear and Loathing in Las Vegas"],["The Promised Neverland","Touch Off UVERworld"],["Re:Zero","Redo Konomi Suzuki"],
+    ["Kakegurui","Deal with the Devil Tia"],["Dandadan","Otonoke Creepy Nuts"],["Mashle","Bling-Bang-Bang-Born Creepy Nuts"],["Kaiju No. 8","Abyss YUNGBLUD"],
+    ["Tokyo Revengers","Cry Baby Official HIGE DANdism"]],
   kids: [['SpongeBob SquarePants','SpongeBob SquarePants Theme'],['PAW Patrol','PAW Patrol Theme'],['Peppa Pig','Peppa Pig Theme'],['Phineas and Ferb','Phineas and Ferb Theme Bowling for Soup'],
     ['DuckTales','DuckTales Theme'],['Teenage Mutant Ninja Turtles','Teenage Mutant Ninja Turtles Theme'],['Scooby-Doo','Scooby Doo Where Are You Theme'],['Bluey','Bluey Theme Tune'],
     ['Thomas & Friends','Thomas the Tank Engine Theme'],['Power Rangers','Go Go Power Rangers'],['The Fairly OddParents','Fairly OddParents Theme'],['Adventure Time','Adventure Time Theme'],
@@ -410,7 +415,11 @@ const SHOWS = {
     ["Arthur","Believe in Yourself Ziggy Marley"],["Dora the Explorer","Dora the Explorer Theme"],["Sesame Street","Sesame Street Theme"],["Pingu","Pingu Theme"],
     ["Postman Pat","Postman Pat Theme"],["Fireman Sam","Fireman Sam Theme"],["The Powerpuff Girls","Powerpuff Girls Theme"],
     ["Kim Possible","Call Me Beep Me Christina Milian"],["Dexter's Laboratory","Dexter's Laboratory Theme"],["Ben 10","Ben 10 Theme"],["Pocoyo","Pocoyo Theme"],
-    ["Rugrats","Rugrats Theme"],["Hey Arnold!","Hey Arnold Theme"]],
+    ["Rugrats","Rugrats Theme"],["Hey Arnold!","Hey Arnold Theme"],
+    ["The Amazing World of Gumball","Amazing World of Gumball Theme"],["Steven Universe","We Are the Crystal Gems Steven Universe"],
+    ["My Little Pony: Friendship Is Magic","My Little Pony Friendship Is Magic Theme"],["Code Lyoko","A World Without Danger Code Lyoko"],
+    ["Wizards of Waverly Place","Everything Is Not What It Seems Selena Gomez"],["Big Time Rush","Big Time Rush Theme"],["iCarly","Leave It All to Me Miranda Cosgrove"],
+    ["Zoey 101","Follow Me Jamie Lynn Spears"],["Lizzie McGuire","Lizzie McGuire Theme Angie Jaree"]],
   tv: [['Breaking Bad','Breaking Bad Main Title Theme'],['Game of Thrones','Game of Thrones Main Title Ramin Djawadi'],['Stranger Things','Stranger Things Main Title'],
     ['Friends',"I'll Be There for You The Rembrandts"],['The Simpsons','The Simpsons Main Title Theme'],['The Office','The Office Theme'],['Succession','Succession Main Title Theme'],
     ['The Sopranos','Woke Up This Morning Alabama 3'],['Peaky Blinders','Red Right Hand Nick Cave'],['The Walking Dead','The Walking Dead Main Title Theme'],
@@ -426,7 +435,11 @@ const SHOWS = {
     ["Vikings","If I Had a Heart Fever Ray"],["Suits","Greenback Boogie Ima Robot"],["Arcane","Enemy Imagine Dragons"],
     ["Prison Break","Prison Break Main Title Ramin Djawadi"],["Smallville","Save Me Remy Zero"],["The O.C.","California Phantom Planet"],
     ["House","Teardrop Massive Attack"],["Cheers","Where Everybody Knows Your Name Gary Portnoy"],["Full House","Everywhere You Look Jesse Frederick"],
-    ["One Tree Hill","I Don't Want to Be Gavin DeGraw"],["Weeds","Little Boxes Malvina Reynolds"],["Rick and Morty","Rick and Morty Theme"]],
+    ["One Tree Hill","I Don't Want to Be Gavin DeGraw"],["Weeds","Little Boxes Malvina Reynolds"],["Rick and Morty","Rick and Morty Theme"],
+    ["Severance","Severance Main Title Theodore Shapiro"],["Ted Lasso","Ted Lasso Main Title Marcus Mumford"],
+    ["The White Lotus","Aloha White Lotus Cristobal Tapia de Veer"],["Lost","Lost Main Title Michael Giacchino"],["Bridgerton","Bridgerton Main Title Kris Bowers"],
+    ["Yellowstone","Yellowstone Main Theme Brian Tyler"],["Shameless","The Luck You Got The High Strung"],["Malcolm in the Middle","Boss of Me They Might Be Giants"],
+    ["Family Guy","Family Guy Theme"],["South Park","South Park Theme Primus"],["Futurama","Futurama Theme"]],
   games: [
     ["Super Mario Bros.","Super Mario Bros Ground Theme"],["The Legend of Zelda","Legend of Zelda Main Theme Koji Kondo"],["Tetris","Tetris Theme Korobeiniki"],
     ["Minecraft","Sweden C418"],["Halo","Halo Theme Martin O'Donnell"],["Skyrim","Dragonborn Jeremy Soule"],["Final Fantasy VII","One-Winged Angel Nobuo Uematsu"],
@@ -438,7 +451,11 @@ const SHOWS = {
     ["Kingdom Hearts","Simple and Clean Utada Hikaru"],["Hollow Knight","Hollow Knight Christopher Larkin"],["Celeste","Resurrections Lena Raine"],
     ["Among Us","Among Us Theme"],["Call of Duty: Modern Warfare 2","Modern Warfare 2 Theme Hans Zimmer"],["Mega Man 2","Dr. Wily Stage Mega Man 2"],
     ["Donkey Kong Country","Aquatic Ambience David Wise"],["Persona 5","Last Surprise Persona 5"],["Geometry Dash","Stereo Madness ForeverBound"],
-    ["Mario Kart","Mario Kart Theme"]],
+    ["Mario Kart","Mario Kart Theme"],
+    ["Halo 3","Halo 3 One Final Effort Martin O'Donnell"],["Super Mario Galaxy","Gusty Garden Galaxy Mahito Yokota"],
+    ["Zelda: Breath of the Wild","Breath of the Wild Main Theme"],["The Sims","The Sims Buy Mode Jerry Martin"],["Angry Birds","Angry Birds Theme Ari Pulkkinen"],
+    ["Subway Surfers","Subway Surfers Theme"],["Fallout 4","Fallout 4 Main Theme Inon Zur"],["Cuphead","Floral Fury Kristofer Maddigan"],
+    ["Final Fantasy X","To Zanarkand Nobuo Uematsu"]],
   movies: [
     ["Star Wars","Star Wars Main Title John Williams"],["Harry Potter","Hedwig's Theme John Williams"],["Jurassic Park","Jurassic Park Theme John Williams"],
     ["Titanic","My Heart Will Go On Celine Dion"],["Pirates of the Caribbean","He's a Pirate Klaus Badelt"],["Indiana Jones","Raiders March John Williams"],
@@ -467,6 +484,37 @@ const SHOWS = {
     ["Golden Wind (Part 5)","裏切り者のレクイエム ハセガワダイスケ"],["Stone Ocean (Part 6)","STONE OCEAN ichigo 岸田教団"],
     ["Stone Ocean (Part 6)","Heaven's falling down sana"]],
 };
+SHOWS.eurovision = [
+    ["Tattoo","Tattoo Loreen"],["Hard Rock Hallelujah","Hard Rock Hallelujah Lordi"],["Cha Cha Cha","Cha Cha Cha Käärijä"],["Waterloo","Waterloo ABBA"],
+    ["Zitti e buoni","Zitti e buoni Maneskin"],["Arcade","Arcade Duncan Laurence"],["Fairytale","Fairytale Alexander Rybak"],["Toy","Toy Netta"],
+    ["Heroes","Heroes Mans Zelmerlow"],["Rise Like a Phoenix","Rise Like a Phoenix Conchita Wurst"],["Only Teardrops","Only Teardrops Emmelie de Forest"],
+    ["Satellite","Satellite Lena"],["Dancing Lasha Tumbai","Dancing Lasha Tumbai Verka Serduchka"],["Stefania","Stefania Kalush Orchestra"],["The Code","The Code Nemo"],
+    ["Molitva","Molitva Marija Serifovic"],["Run Away","Run Away SunStroke Project"],["Snap","Snap Rosa Linn"],["Space Man","Space Man Sam Ryder"],
+    ["Love Shine a Light","Love Shine a Light Katrina and the Waves"],["Wild Dances","Wild Dances Ruslana"],["My Number One","My Number One Helena Paparizou"],
+    ["Believe","Believe Dima Bilan"],["Ne partez pas sans moi","Ne partez pas sans moi Celine Dion"]];
+SHOWS.christmas = [
+    ["All I Want for Christmas Is You","All I Want for Christmas Is You Mariah Carey"],["Last Christmas","Last Christmas Wham"],
+    ["Jingle Bell Rock","Jingle Bell Rock Bobby Helms"],["Feliz Navidad","Feliz Navidad Jose Feliciano"],
+    ["Rockin' Around the Christmas Tree","Rockin Around the Christmas Tree Brenda Lee"],
+    ["It's Beginning to Look a Lot Like Christmas","Beginning to Look a Lot Like Christmas Michael Buble"],["Santa Tell Me","Santa Tell Me Ariana Grande"],
+    ["Let It Snow!","Let It Snow Dean Martin"],["A Holly Jolly Christmas","Holly Jolly Christmas Burl Ives"],
+    ["Happy Xmas (War Is Over)","Happy Xmas War Is Over John Lennon"],["Do They Know It's Christmas?","Do They Know It's Christmas Band Aid"],
+    ["Fairytale of New York","Fairytale of New York The Pogues"],["Driving Home for Christmas","Driving Home for Christmas Chris Rea"],
+    ["Wonderful Christmastime","Wonderful Christmastime Paul McCartney"],["Mistletoe","Mistletoe Justin Bieber"],
+    ["Underneath the Tree","Underneath the Tree Kelly Clarkson"],["Sleigh Ride","Sleigh Ride The Ronettes"],["White Christmas","White Christmas Bing Crosby"],
+    ["Merry Christmas Everyone","Merry Christmas Everyone Shakin Stevens"],["Step Into Christmas","Step Into Christmas Elton John"]];
+SHOWS.memes = [
+    ["Never Gonna Give You Up","Never Gonna Give You Up Rick Astley"],["Sandstorm","Sandstorm Darude"],["Astronomia","Astronomia Tony Igy"],
+    ["Gangnam Style","Gangnam Style PSY"],["The Fox (What Does the Fox Say?)","The Fox Ylvis"],["Crab Rave","Crab Rave Noisestorm"],["All Star","All Star Smash Mouth"],
+    ["Harlem Shake","Harlem Shake Baauer"],["Dragostea Din Tei","Dragostea Din Tei O-Zone"],["Blue (Da Ba Dee)","Blue Da Ba Dee Eiffel 65"],
+    ["Chug Jug with You","Chug Jug With You Leviathan"],["Ievan Polkka","Ievan Polkka Loituma"],["Caramelldansen","Caramelldansen Caramell"],
+    ["Rasputin","Rasputin Boney M"],["Running in the 90s","Running in the 90s Max Coveri"]];
+SHOWS.stadium = [
+    ["Seven Nation Army","Seven Nation Army The White Stripes"],["Sweet Caroline","Sweet Caroline Neil Diamond"],["We Are the Champions","We Are the Champions Queen"],
+    ["Thunderstruck","Thunderstruck AC/DC"],["Song 2","Song 2 Blur"],["Kernkraft 400","Kernkraft 400 Zombie Nation"],["Jump Around","Jump Around House of Pain"],
+    ["Pump It","Pump It Black Eyed Peas"],["Livin' on a Prayer","Livin on a Prayer Bon Jovi"],["Don't Stop Me Now","Don't Stop Me Now Queen"],
+    ["Waka Waka","Waka Waka Shakira"],["Hall of Fame","Hall of Fame The Script"],["Centuries","Centuries Fall Out Boy"],["Believer","Believer Imagine Dragons"],
+    ["Can't Hold Us","Can't Hold Us Macklemore"]];
 const SHOW_COUNTRY = { jojo:'JP' }; // store to search per category (entry's 3rd item overrides)
 // [title prefix, question, placeholder] per category
 const SHOW_TEXT = {
@@ -474,7 +522,11 @@ const SHOW_TEXT = {
   tv:['Show', 'Which series is this intro from?', 'Type the show name…'], games:['Game', 'Which game is this music from?', 'Type the game…'],
   movies:['Movie', 'Which movie is this from?', 'Type the movie…'], disney:['Movie', 'Which movie is this song from?', 'Type the movie…'],
   jojo:['Opening', 'Which JoJo part is this opening from?', 'Type the part, e.g. Golden Wind…'],
+  eurovision:['Song', 'Name the Eurovision song!', 'Type the song…'], christmas:['Song', 'Name the Christmas song!', 'Type the song…'],
+  memes:['Song', 'Name the meme song!', 'Type the song…'], stadium:['Song', 'Name the stadium anthem!', 'Type the song…'],
 };
+const PARTY_CARDS = [['Eurovision', 'Winners and fan favourites', 'eurovision'], ['Christmas Songs', 'Jingle all the way', 'christmas'],
+  ['Meme Songs', 'Rickrolls, Sandstorm, Coffin Dance…', 'memes'], ['Stadium Anthems', 'Songs crowds sing along to', 'stadium']];
 const SHOW_CARDS = [['Anime Openings', 'Name the anime from its opening', 'anime'], ["Kids' Shows", 'Cartoon and kids TV intros', 'kids'], ['TV Series Themes', 'Breaking Bad, Friends, Game of Thrones…', 'tv'], ['Video Game Music', 'Mario, Zelda, Minecraft, Halo…', 'games'],
   ['Movie Themes', 'Star Wars, Harry Potter, Rocky…', 'movies'], ['Disney Songs', 'Name the movie from the song', 'disney'],
   ["JoJo's Bizarre Adventure", 'Name the part from its opening', 'jojo']];
@@ -670,7 +722,9 @@ const findTheme = (show, q, country) => cached(`gts-show-${country}-${q}`, () =>
   return t ? { trackId:t.trackId, trackName:show, collectionName:t.trackName, artistName:t.artistName, previewUrl:t.previewUrl, artworkUrl100:t.artworkUrl100, releaseDate:t.releaseDate, trackViewUrl:t.trackViewUrl } : null;
 }), 30 * 864e5).catch(() => null);
 const showArt = key => Promise.all(SHOWS[key].slice(0, 4).map(([show, q, c]) => findTheme(show, q, c || SHOW_COUNTRY[key] || 'US'))).then(r => r.map(t => t?.artworkUrl100.replace('100x100', '200x200')));
-$('shows').append(...SHOW_CARDS.map(([name, desc, key]) => card(name, desc, () => startGame(mkCfg({ shows:key, label:name, from:'home' })), false, showArt(key))));
+const showCard = ([name, desc, key]) => card(name, desc, () => startGame(mkCfg({ shows:key, label:name, from:'home' })), false, showArt(key));
+$('shows').append(...SHOW_CARDS.map(showCard));
+$('party').append(...PARTY_CARDS.map(showCard));
 $('fiQuick').append(...FI_QUICK.map(([name, desc, cfg]) => card(name, desc, () => startGame(mkCfg({ ...cfg, label:name, from:'home' })), false, coverArt(cfg.terms[1], 'FI'))));
 $('fiArtists').append(...FI_ARTISTS.map(a => card(a, 'Artisti', () => startGame(mkCfg({ artist:a, label:a, country:'FI', from:'home' })), true, artistPic(a).then(u => [u]))));
 
