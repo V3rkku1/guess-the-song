@@ -239,7 +239,7 @@
       <div class="body">
         <h2>Quick play</h2><div class="grid" id="quick"></div>
         <h2>Popular artists</h2><div class="grid" id="artists"></div>
-        <h2>TV, anime &amp; game themes</h2><div class="grid" id="shows"></div>
+        <h2>Themes &amp; soundtracks</h2><div class="grid" id="shows"></div>
         <h2>Suomi 🇫🇮</h2><div class="grid" id="fiQuick"></div>
         <h2>Suomalaiset artistit</h2><div class="grid" id="fiArtists"></div>
         <p class="sub" style="margin-top:32px">Playing with: <span id="prefTxt"></span> · <button class="link" data-go="custom">change</button></p>
@@ -368,8 +368,15 @@ const QUICK = [
   ['Pop Hits', 'Chart toppers', { genre:'Pop' }],
   ['Country Roads', 'Boots and banjos', { genre:'Country' }],
   ['Dance Floor', 'Turn it up', { genre:'Dance' }],
+  ['70s Hits', 'Disco, funk and rock', { decade:'1970' }],
+  ['2020s Hits', 'What everyone is playing now', { decade:'2020' }],
+  ['R&B', 'Smooth grooves', { genre:'R&B/Soul' }],
+  ['Metal', 'Loud and heavy', { genre:'Metal' }],
+  ['Latin', 'Reggaeton, salsa and more', { genre:'Latin' }],
+  ['Electronic', 'Drops and synths', { genre:'Electronic' }],
+  ['K-Pop', 'Idols and anthems', { genre:'K-Pop' }],
 ];
-const FI_ARTISTS = ['Käärijä','JVG','Antti Tuisku','Haloo Helsinki!','Erika Vikman','Cheek','Sanni','Nightwish','Apulanta','Elastinen','BEHM','Isac Elliot'];
+const FI_ARTISTS = ['Käärijä','JVG','Antti Tuisku','Haloo Helsinki!','Erika Vikman','Cheek','Sanni','Nightwish','Apulanta','Elastinen','BEHM','Isac Elliot','Robin','Jenni Vartiainen','Vesala','Sexmane'];
 const FI_WORDS = ['rakkaus','yö','kesä','sydän','tanssi','koti','ikuisesti','sinä','elämä','kaunis','kuu','tyttö','unelma','juhla'];
 const FI_QUICK = [
   ['Suomi-hitit', 'Kotimaiset hitit laidasta laitaan', { country:'FI', terms:FI_WORDS }],
@@ -428,9 +435,46 @@ const SHOWS = {
     ["Among Us","Among Us Theme"],["Call of Duty: Modern Warfare 2","Modern Warfare 2 Theme Hans Zimmer"],["Mega Man 2","Dr. Wily Stage Mega Man 2"],
     ["Donkey Kong Country","Aquatic Ambience David Wise"],["Persona 5","Last Surprise Persona 5"],["Geometry Dash","Stereo Madness ForeverBound"],
     ["Mario Kart","Mario Kart Theme"]],
+  movies: [
+    ["Star Wars","Star Wars Main Title John Williams"],["Harry Potter","Hedwig's Theme John Williams"],["Jurassic Park","Jurassic Park Theme John Williams"],
+    ["Titanic","My Heart Will Go On Celine Dion"],["Pirates of the Caribbean","He's a Pirate Klaus Badelt"],["Indiana Jones","Raiders March John Williams"],
+    ["Rocky","Gonna Fly Now Bill Conti"],["Mission: Impossible","Mission Impossible Theme Lalo Schifrin"],["James Bond","James Bond Theme Monty Norman"],
+    ["Back to the Future","Back to the Future Alan Silvestri"],["The Godfather","The Godfather Love Theme Nino Rota"],["Jaws","Jaws Main Title John Williams"],
+    ["Ghostbusters","Ghostbusters Ray Parker Jr"],["Top Gun","Danger Zone Kenny Loggins"],["Interstellar","Cornfield Chase Hans Zimmer"],["Inception","Time Hans Zimmer"],
+    ["The Lord of the Rings","Concerning Hobbits Howard Shore"],["Gladiator","Now We Are Free Hans Zimmer"],["The Pink Panther","The Pink Panther Theme Henry Mancini"],
+    ["Rocky III","Eye of the Tiger Survivor"],["Dirty Dancing","Time of My Life Bill Medley Jennifer Warnes"],["Avengers","The Avengers Alan Silvestri"],
+    ["The Good, the Bad and the Ugly","The Good the Bad and the Ugly Ennio Morricone"],["Titanic (score)","Hymn to the Sea James Horner"],
+    ["Spider-Man: Into the Spider-Verse","Sunflower Post Malone Swae Lee"],["Top Gun: Maverick","Hold My Hand Lady Gaga"],["Barbie","What Was I Made For Billie Eilish"],
+    ["Skyfall","Skyfall Adele"],["Oppenheimer","Can You Hear the Music Ludwig Goransson"]],
+  disney: [
+    ["The Lion King","Circle of Life Carmen Twillie"],["The Little Mermaid","Under the Sea Samuel E. Wright"],["Moana","How Far I'll Go Auli'i Cravalho"],
+    ["Encanto","We Don't Talk About Bruno"],["Aladdin","A Whole New World Brad Kane Lea Salonga"],["Toy Story","You've Got a Friend in Me Randy Newman"],
+    ["Beauty and the Beast","Beauty and the Beast Angela Lansbury"],["Pocahontas","Colors of the Wind Judy Kuhn"],["Mulan","Reflection Lea Salonga"],
+    ["Tangled","I See the Light Mandy Moore"],["Hercules","Zero to Hero Hercules"],["Coco","Remember Me Coco"],["Zootopia","Try Everything Shakira"],
+    ["The Jungle Book","The Bare Necessities Phil Harris"],["Frozen II","Into the Unknown Idina Menzel"],["The Princess and the Frog","Almost There Anika Noni Rose"],
+    ["Wish","This Wish Ariana DeBose"],["Hannah Montana: The Movie","The Climb Miley Cyrus"],["High School Musical","Breaking Free Zac Efron"],
+    ["Camp Rock","This Is Me Demi Lovato"],["Frozen","Let It Go Idina Menzel"]],
+  jojo: [
+    ["JoJo ~Sono Chi no Sadame~","ジョジョ その血の運命 富永TOMMY弘明"],["Bloody Stream","BLOODY STREAM Coda"],["Stand Proud","STAND PROUD 橋本仁"],
+    ["Sono Chi no Kioku ~end of THE WORLD~","ジョジョ その血の記憶 end of THE WORLD"],["Crazy Noisy Bizarre Town","Crazy Noisy Bizarre Town THE DU"],["Chase","chase batta"],
+    ["Great Days","Great Days 青木カレン ハセガワダイスケ"],["Fighting Gold","Fighting Gold Coda"],["Traitor's Requiem","裏切り者のレクイエム ハセガワダイスケ"],
+    ["STONE OCEAN","STONE OCEAN ichigo 岸田教団"],["Heaven's Falling Down","Heaven's falling down sana"],["Il Vento d'Oro (Giorno's Theme)","il vento d'oro 菅野祐悟"],
+    ["Awake (Pillar Men Theme)","Awake 岩崎琢"],["Roundabout","Roundabout Yes"],["Walk Like an Egyptian","Walk Like an Egyptian The Bangles"],
+    ["I Want You","I Want You Savage Garden"],["Freek'n You","Freek'n You Jodeci"],["Last Train Home","Last Train Home Pat Metheny Group"],
+    ["Modern Crusaders","Modern Crusaders Enigma"],["Distant Dreamer","Distant Dreamer Duffy","US"]],
 };
-const SHOW_CARDS = [['Anime Openings', 'Name the anime from its opening', 'anime'], ["Kids' Shows", 'Cartoon and kids TV intros', 'kids'], ['TV Series Themes', 'Breaking Bad, Friends, Game of Thrones…', 'tv'], ['Video Game Music', 'Mario, Zelda, Minecraft, Halo…', 'games']];
-const ARTISTS = ['Taylor Swift','Queen','Drake','The Weeknd','Eminem','ABBA','Michael Jackson','Billie Eilish','Coldplay','Ed Sheeran','Rihanna','Metallica'];
+const SHOW_COUNTRY = { jojo:'JP' }; // store to search per category (entry's 3rd item overrides)
+// [title prefix, question, placeholder] per category
+const SHOW_TEXT = {
+  anime:['Show', 'Which anime is this opening from?', 'Type the anime…'], kids:['Show', 'Which kids show is this intro from?', 'Type the show…'],
+  tv:['Show', 'Which series is this intro from?', 'Type the show name…'], games:['Game', 'Which game is this music from?', 'Type the game…'],
+  movies:['Movie', 'Which movie is this from?', 'Type the movie…'], disney:['Movie', 'Which movie is this song from?', 'Type the movie…'],
+  jojo:['Song', 'Which JoJo opening or ending is this?', 'Type the song…'],
+};
+const SHOW_CARDS = [['Anime Openings', 'Name the anime from its opening', 'anime'], ["Kids' Shows", 'Cartoon and kids TV intros', 'kids'], ['TV Series Themes', 'Breaking Bad, Friends, Game of Thrones…', 'tv'], ['Video Game Music', 'Mario, Zelda, Minecraft, Halo…', 'games'],
+  ['Movie Themes', 'Star Wars, Harry Potter, Rocky…', 'movies'], ['Disney Songs', 'Name the movie from the song', 'disney'],
+  ["JoJo's Bizarre Adventure", 'Openings and endings — name the song', 'jojo']];
+const ARTISTS = ['Taylor Swift','Queen','Drake','The Weeknd','Eminem','ABBA','Michael Jackson','Billie Eilish','Coldplay','Ed Sheeran','Rihanna','Metallica','Beyoncé','Bruno Mars','Dua Lipa','Arctic Monkeys','Kendrick Lamar','Lady Gaga','Bad Bunny','BTS'];
 const ICONS = {
   home:'M12 3 2 12h3v9h6v-6h2v6h6v-9h3z',
   tune:'M3 17v2h6v-2zM3 5v2h10V5zm10 16v-2h8v-2h-8v-2h-2v6zM7 9v2H3v2h4v2h2V9zm14 4v-2H11v2zm-6-4h2V7h4V5h-4V3h-2z',
@@ -616,12 +660,12 @@ $('artists').append(...ARTISTS.map(a => card(a, 'Artist', () => startGame(mkCfg(
 const findTheme = (show, q, country) => cached(`gts-show-${country}-${q}`, () => itunes({ term:q, country, limit:10 }).then(res => {
   // prefer a result containing every search word (Unravel by TK, not Unravel by Björk); skip karaoke/8-bit/remix takes
   const words = fold(q).split(/\s+/).filter(w => w.length > 2).slice(0, 3), txt = t => fold(t.trackName + ' ' + t.collectionName + ' ' + t.artistName);
-  const ok = res.filter(t => t.previewUrl && !/karaoke|8.bit|remix|lullaby|ringtone|piano version|music box|a cappella|lo-?fi|metal version|dance mix|guide melody|off vocal/i.test(t.trackName + ' ' + t.collectionName));
+  const ok = res.filter(t => t.previewUrl && !/karaoke|8.bit|remix|lullaby|ringtone|piano version|\(piano\)|music box|orgel|originally performed|a cappella|lo-?fi|metal version|dance mix|guide melody|off vocal/i.test(t.trackName + ' ' + t.collectionName));
   const t = ok.find(t => words.every(w => txt(t).includes(w))) || ok.find(t => words.some(w => txt(t).includes(w)));
   // the answer is the show; keep the real song title for the reveal
   return t ? { trackId:t.trackId, trackName:show, collectionName:t.trackName, artistName:t.artistName, previewUrl:t.previewUrl, artworkUrl100:t.artworkUrl100, releaseDate:t.releaseDate, trackViewUrl:t.trackViewUrl } : null;
 }), 30 * 864e5).catch(() => null);
-const showArt = key => Promise.all(SHOWS[key].slice(0, 4).map(([show, q]) => findTheme(show, q, 'US'))).then(r => r.map(t => t?.artworkUrl100.replace('100x100', '200x200')));
+const showArt = key => Promise.all(SHOWS[key].slice(0, 4).map(([show, q, c]) => findTheme(show, q, c || SHOW_COUNTRY[key] || 'US'))).then(r => r.map(t => t?.artworkUrl100.replace('100x100', '200x200')));
 $('shows').append(...SHOW_CARDS.map(([name, desc, key]) => card(name, desc, () => startGame(mkCfg({ shows:key, label:name, from:'home' })), false, showArt(key))));
 $('fiQuick').append(...FI_QUICK.map(([name, desc, cfg]) => card(name, desc, () => startGame(mkCfg({ ...cfg, label:name, from:'home' })), false, coverArt(cfg.terms[1], 'FI'))));
 $('fiArtists').append(...FI_ARTISTS.map(a => card(a, 'Artisti', () => startGame(mkCfg({ artist:a, label:a, country:'FI', from:'home' })), true, artistPic(a).then(u => [u]))));
@@ -716,7 +760,7 @@ async function buildPool(cfg, r) {
   const { artist, genre, decade, country = 'US' } = cfg;
   if (SHOWS[cfg.shows]) { // max 12 lookups per game: stays well under iTunes' per-minute limit
     const picked = shuffle(SHOWS[cfg.shows], r).slice(0, Math.min(12, cfg.rounds + 3));
-    return (await Promise.all(picked.map(([show, q]) => findTheme(show, q, country)))).filter(Boolean).sort((a, b) => a.trackId - b.trackId);
+    return (await Promise.all(picked.map(([show, q, c]) => findTheme(show, q, c || SHOW_COUNTRY[cfg.shows] || country)))).filter(Boolean).sort((a, b) => a.trackId - b.trackId);
   }
   let terms, extra = { country };
   if (cfg.terms?.length && cfg.byArtist) { // playlist made of artist names: only songs credited to one of them
@@ -811,11 +855,10 @@ function next() {
   $('art').innerHTML = $('miniArt').innerHTML = EQ;
   $('gbg').style.backgroundImage = '';
   $('gLabel').textContent = (G.cfg.daily ? 'DAILY CHALLENGE · ' : 'PLAYING · ') + G.cfg.label.toUpperCase();
-  const isShow = !!SHOWS[G.cfg.shows];
-  $('songTitle').textContent = (G.cfg.shows === 'games' ? 'Game ' : isShow ? 'Show ' : 'Song ') + G.round;
-  const isGame = G.cfg.shows === 'games';
-  $('songArtist').textContent = isGame ? 'Which game is this music from?' : isShow ? 'Which series is this intro from?' : 'Unknown artist · listen and guess';
-  $('guess').placeholder = isGame ? 'Know it? Type the game…' : isShow ? 'Know it? Type the show name…' : 'Know it? Search for the title…';
+  const [noun, question, hint] = SHOW_TEXT[G.cfg.shows] || ['Song', 'Unknown artist · listen and guess', 'Search for the title…'];
+  $('songTitle').textContent = noun + ' ' + G.round;
+  $('songArtist').textContent = question;
+  $('guess').placeholder = 'Know it? ' + hint;
   $('guess').value = ''; $('result').replaceChildren();
   $('typeBox').hidden = G.cfg.mode !== 'type';
   $('nextBtn').hidden = true; $('skip2').hidden = $('giveup').hidden = false;
