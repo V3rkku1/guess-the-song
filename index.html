@@ -848,11 +848,23 @@ const alike = (a, b) => { const x = norm(a), y = norm(b); return !x || !y || x.i
 console.assert(alike('Love', 'Love You') && alike('Hello', 'Helo') && !alike('Hello', 'Yesterday'), 'alike');
 // Wrong options come from songs NOT in this game, so options never reveal past or upcoming answers.
 // Only a tiny pool falls back to upcoming, then already-played songs.
+// small categories borrow wrong options from similar ones (15 meme songs alone = same 3 every round)
+const SHOW_GROUPS = [['anime', 'kids', 'tv'], ['movies', 'disney'], ['memes', 'onehit', 'tiktok', 'stadium', 'boybands', 'eurovision'],
+  ['suomihitit', 'suomiklassikot', 'finrock']];
+// extra wrong-option names (no audio needed) for categories with no similar category to borrow from
+const SHOW_DECOYS = { christmas: ['Jingle Bells','Silent Night',"Santa Claus Is Comin' to Town",'Frosty the Snowman','Winter Wonderland','Little Drummer Boy',
+  'Blue Christmas','Run Rudolph Run','Rudolph the Red-Nosed Reindeer','Santa Baby','Christmas (Baby Please Come Home)',"Baby, It's Cold Outside",
+  'Have Yourself a Merry Little Christmas','Deck the Halls','O Holy Night','The Christmas Song','Merry Xmas Everybody','Last Christmas Night',
+  'Christmas Lights','Wonderful Dream (Holidays Are Coming)'] };
 function choicesFor(song) {
   const inGame = new Set(G.queue.map(t => t.trackName));
+  const names = (keys, related) => keys.flatMap(k => SHOWS[k]).filter(([n]) => !inGame.has(n)).map(([n]) => ({ trackName:n, artistName:'', related }));
+  const key = G.cfg.shows, group = SHOW_GROUPS.find(g => g.includes(key)) || [];
   const outside = [...G.pool.filter(t => !inGame.has(t.trackName)), ...G.fillers,
-    ...(SHOWS[G.cfg.shows] || []).filter(([n]) => !inGame.has(n)).map(([n]) => ({ trackName:n, artistName:'' }))];
-  const leastUsed = a => shuffle(a).sort((x, y) => (G.used.get(x.trackName) || 0) - (G.used.get(y.trackName) || 0)); // rotate, don't repeat the same 3
+    ...(SHOWS[key] ? names([key], 0) : []), ...names(group.filter(k => k !== key), 1), ...(SHOW_DECOYS[key] || []).map(n => ({ trackName:n, artistName:'' }))];
+  // rotate: least-shown first; a similar category's names only fill in once this category's spare names are used up
+  const score = t => (G.used.get(t.trackName) || 0) * 2 + (t.related || 0);
+  const leastUsed = a => shuffle(a).sort((x, y) => score(x) - score(y));
   const tiers = [leastUsed(outside), shuffle(G.queue.slice(G.round)), shuffle(G.queue.slice(0, G.round - 1))];
   const out = [song];
   for (const strict of [true, false]) for (const tier of tiers) for (const t of tier)
