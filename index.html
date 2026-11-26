@@ -384,7 +384,7 @@ const QUICK = [
 const FI_ARTISTS = ['Käärijä','JVG','Antti Tuisku','Haloo Helsinki!','Erika Vikman','Cheek','Sanni','Nightwish','Apulanta','Elastinen','BEHM','Isac Elliot','Robin','Jenni Vartiainen','Vesala','Sexmane'];
 const FI_WORDS = ['rakkaus','yö','kesä','sydän','tanssi','koti','ikuisesti','sinä','elämä','kaunis','kuu','tyttö','unelma','juhla'];
 const FI_QUICK = [
-  ['Suomi-hitit', 'Kotimaiset hitit laidasta laitaan', { country:'FI', terms:FI_WORDS }],
+  ['Suomi-mix', 'Satunnaisia kotimaisia biisejä', { country:'FI', terms:FI_WORDS }],
   ['Suomipop', 'Radiohitit ja singalongit', { country:'FI', byArtist:true, terms:['Antti Tuisku','Sanni','Erika Vikman','Isac Elliot','BEHM','Vesala','Juha Tapio','Arttu Wiskari','Käärijä','Chisu','Kaija Koo','Jenni Vartiainen'] }],
   ['Suomirap', 'Riimit suomeksi', { country:'FI', byArtist:true, terms:['JVG','Cheek','Elastinen','Gettomasa','Mikael Gabriel','Pyhimys','Etta','Sexmane','Ibe','Averagekidluke'] }],
   ['Suomirock', 'Kitarat kaakkoon', { country:'FI', byArtist:true, terms:['Apulanta','Eppu Normaali','Popeda','Yö','Kolmas Nainen','Nightwish','HIM','The Rasmus','Sunrise Avenue','Haloo Helsinki!','Happoradio','PMMP'] }],
@@ -515,18 +515,64 @@ SHOWS.stadium = [
     ["Pump It","Pump It Black Eyed Peas"],["Livin' on a Prayer","Livin on a Prayer Bon Jovi"],["Don't Stop Me Now","Don't Stop Me Now Queen"],
     ["Waka Waka","Waka Waka Shakira"],["Hall of Fame","Hall of Fame The Script"],["Centuries","Centuries Fall Out Boy"],["Believer","Believer Imagine Dragons"],
     ["Can't Hold Us","Can't Hold Us Macklemore"]];
-const SHOW_COUNTRY = { jojo:'JP' }; // store to search per category (entry's 3rd item overrides)
+SHOWS.suomihitit = [
+    ["Mic Mac","Mic Mac Käärijä"],["Viulunkieli","Viulunkieli Käärijä"],["Ich komme","Ich komme Erika Vikman"],["Cicciolina","Cicciolina Erika Vikman"],
+    ["2080-luvulla","2080-luvulla Sanni"],["Pojat","Pojat Sanni"],["Frontside Ollie","Frontside Ollie Robin"],["Ikuinen vappu","Ikuinen vappu JVG"],
+    ["Sokka irti","Sokka irti Cheek"],["Liekeissä","Liekeis Cheek"],["Peto on irti","Peto on irti Antti Tuisku"],["En kommentoi","En kommentoi Antti Tuisku"],
+    ["Beibi","Beibi Haloo Helsinki"],["Kuussa tuulee","Kuussa tuulee Haloo Helsinki"],["Hei rakas","Hei rakas BEHM"],["Mökkitie","Mökkitie Arttu Wiskari"],
+    ["Leijonakuningas","Leijonakuningas Ellinoora"],["Missä muruseni on","Missä muruseni on Jenni Vartiainen"],["Ihmisten edessä","Ihmisten edessä Jenni Vartiainen"],
+    ["C'est la vie","C'est la vie Anna Puu"],["New Way Home","New Way Home Isac Elliot"],["Baden-Baden","Baden-Baden Chisu"],["Kaksi puuta","Kaksi puuta Juha Tapio"]];
+SHOWS.suomiklassikot = [
+    ["Murheellisten laulujen maa","Murheellisten laulujen maa Eppu Normaali"],["Vuonna 85","Vuonna 85 Eppu Normaali"],["Kuuma kesä","Kuuma kesä Popeda"],
+    ["Joutsenlaulu","Joutsenlaulu Yö"],["Tinakenkätyttö","Tinakenkätyttö Kaija Koo"],["Aikuinen nainen","Aikuinen nainen Paula Koivuniemi"],
+    ["Lapin kesä","Lapin kesä Vesa-Matti Loiri"],["Autiotalo","Autiotalo Dingo"],["Pohjois-Karjala","Pohjois-Karjala Leevi and the Leavings"],
+    ["Ryysyranta","Ryysyranta Irwin Goodman"],["Lumi teki enkelin eteiseen","Lumi teki enkelin eteiseen Hector"],["Hengaillaan","Hengaillaan Kirka"],
+    ["Satulinna","Satulinna Jari Sillanpää"],["Kulkurin valssi","Kulkurin valssi Tapio Rautavaara"],["Mitä kuuluu","Mitä kuuluu Apulanta"],
+    ["Anna mulle piiskaa","Anna mulle piiskaa Apulanta"],["Matkalaulu","Matkalaulu PMMP"],["Rusketusraidat","Rusketusraidat PMMP"],
+    ["Viidestoista yö","Viidestoista yö Juice Leskinen"]];
+SHOWS.finrock = [
+    ["Nemo","Nemo Nightwish"],["Join Me in Death","Join Me in Death HIM"],["In the Shadows","In the Shadows The Rasmus"],
+    ["Fairytale Gone Bad","Fairytale Gone Bad Sunrise Avenue"],["Freestyler","Freestyler Bomfunk MC's"],["Carnival of Rust","Carnival of Rust Poets of the Fall"],
+    ["House of Sleep","House of Sleep Amorphis"],["Hunting High and Low","Hunting High and Low Stratovarius"],["FullMoon","FullMoon Sonata Arctica"],
+    ["King for a Day","King for a Day Battle Beast"],["Wings of a Butterfly","Wings of a Butterfly HIM"],["Amaranth","Amaranth Nightwish"]];
+SHOWS.onehit = [
+    ["Macarena","Macarena Los del Rio"],["Mambo No. 5","Mambo No 5 Lou Bega"],["Who Let the Dogs Out","Who Let the Dogs Out Baha Men"],
+    ["Tubthumping","Tubthumping Chumbawamba"],["Barbie Girl","Barbie Girl Aqua"],["Ice Ice Baby","Ice Ice Baby Vanilla Ice"],
+    ["Come On Eileen","Come On Eileen Dexys Midnight Runners"],["Tainted Love","Tainted Love Soft Cell"],["Cotton Eye Joe","Cotton Eye Joe Rednex"],
+    ["The Ketchup Song","Asereje Las Ketchup"],["Lambada","Lambada Kaoma"],["Achy Breaky Heart","Achy Breaky Heart Billy Ray Cyrus"],
+    ["Somebody That I Used to Know","Somebody That I Used to Know Gotye"],["Steal My Sunshine","Steal My Sunshine Len"],["MMMBop","MMMBop Hanson"],
+    ["Teenage Dirtbag","Teenage Dirtbag Wheatus"],["I'm Too Sexy","I'm Too Sexy Right Said Fred"],
+    ["Video Killed the Radio Star","Video Killed the Radio Star The Buggles"]];
+SHOWS.tiktok = [
+    ["Running Up That Hill","Running Up That Hill Kate Bush"],["Bloody Mary","Bloody Mary Lady Gaga"],["Makeba","Makeba Jain"],["Little Dark Age","Little Dark Age MGMT"],
+    ["Sweater Weather","Sweater Weather The Neighbourhood"],["Paint the Town Red","Paint the Town Red Doja Cat"],["Calm Down","Calm Down Rema"],
+    ["Cupid","Cupid FIFTY FIFTY"],["Savage Love","Savage Love Jawsh 685 Jason Derulo"],["Say So","Say So Doja Cat"],["Heat Waves","Heat Waves Glass Animals"],
+    ["Stay","Stay The Kid LAROI Justin Bieber"],["Old Town Road","Old Town Road Lil Nas X"],["Pedro","Pedro Jaxomy Agatino Romero Raffaella Carra"]];
+SHOWS.boybands = [
+    ["I Want It That Way","I Want It That Way Backstreet Boys"],["Everybody (Backstreet's Back)","Everybody Backstreet's Back Backstreet Boys"],
+    ["Bye Bye Bye","Bye Bye Bye NSYNC"],["Wannabe","Wannabe Spice Girls"],["Back for Good","Back for Good Take That"],["No Scrubs","No Scrubs TLC"],
+    ["Say My Name","Say My Name Destiny's Child"],["Pure Shores","Pure Shores All Saints"],["End of the Road","End of the Road Boyz II Men"],["Reach","Reach S Club 7"],
+    ["C'est la vie (B*Witched)","C'est la vie B Witched"],["Tearin' Up My Heart","Tearin Up My Heart NSYNC"],["Spice Up Your Life","Spice Up Your Life Spice Girls"],
+    ["Larger Than Life","Larger Than Life Backstreet Boys"],["Waterfalls","Waterfalls TLC"]];
+const SHOW_COUNTRY = { jojo:'JP', suomihitit:'FI', suomiklassikot:'FI', finrock:'FI' }; // store to search per category (entry's 3rd item overrides)
 // [title prefix, question, placeholder] per category
 const SHOW_TEXT = {
-  anime:['Show', 'Which anime is this opening from?', 'Type the anime…'], kids:['Show', 'Which kids show is this intro from?', 'Type the show…'],
-  tv:['Show', 'Which series is this intro from?', 'Type the show name…'], games:['Game', 'Which game is this music from?', 'Type the game…'],
-  movies:['Movie', 'Which movie is this from?', 'Type the movie…'], disney:['Movie', 'Which movie is this song from?', 'Type the movie…'],
-  jojo:['Opening', 'Which JoJo part is this opening from?', 'Type the part, e.g. Golden Wind…'],
-  eurovision:['Song', 'Name the Eurovision song!', 'Type the song…'], christmas:['Song', 'Name the Christmas song!', 'Type the song…'],
-  memes:['Song', 'Name the meme song!', 'Type the song…'], stadium:['Song', 'Name the stadium anthem!', 'Type the song…'],
+  anime:['Show', 'Which anime is this opening from?', 'Know it? Type the anime…'], kids:['Show', 'Which kids show is this intro from?', 'Know it? Type the show…'],
+  tv:['Show', 'Which series is this intro from?', 'Know it? Type the show name…'], games:['Game', 'Which game is this music from?', 'Know it? Type the game…'],
+  movies:['Movie', 'Which movie is this from?', 'Know it? Type the movie…'], disney:['Movie', 'Which movie is this song from?', 'Know it? Type the movie…'],
+  jojo:['Opening', 'Which JoJo part is this opening from?', 'Know it? Type the part, e.g. Golden Wind…'],
+  eurovision:['Song', 'Name the Eurovision song!', 'Know it? Type the song…'], christmas:['Song', 'Name the Christmas song!', 'Know it? Type the song…'],
+  memes:['Song', 'Name the meme song!', 'Know it? Type the song…'], stadium:['Song', 'Name the stadium anthem!', 'Know it? Type the song…'],
+  suomihitit:['Biisi', 'Mikä suomihitti tämä on?', 'Tiedätkö? Kirjoita biisin nimi…'], suomiklassikot:['Biisi', 'Mikä suomiklassikko tämä on?', 'Tiedätkö? Kirjoita biisin nimi…'],
+  finrock:['Song', 'Name the Finnish rock or metal song!', 'Know it? Type the song…'], onehit:['Song', 'Name the one-hit wonder!', 'Know it? Type the song…'],
+  tiktok:['Song', 'Name the TikTok hit!', 'Know it? Type the song…'], boybands:['Song', 'Name the 90s pop hit!', 'Know it? Type the song…'],
 };
 const PARTY_CARDS = [['Eurovision', 'Winners and fan favourites', 'eurovision'], ['Christmas Songs', 'Jingle all the way', 'christmas'],
-  ['Meme Songs', 'Rickrolls, Sandstorm, Coffin Dance…', 'memes'], ['Stadium Anthems', 'Songs crowds sing along to', 'stadium']];
+  ['Meme Songs', 'Rickrolls, Sandstorm, Coffin Dance…', 'memes'], ['Stadium Anthems', 'Songs crowds sing along to', 'stadium'],
+  ['One-Hit Wonders', 'Macarena, Barbie Girl, Tubthumping…', 'onehit'], ['TikTok Hits', 'Songs that blew up online', 'tiktok'],
+  ['90s Boy Bands & Girl Groups', 'Backstreet Boys, Spice Girls, NSYNC…', 'boybands']];
+const FI_CARDS = [['Suomihitit', 'Tämän päivän kotimaiset hitit', 'suomihitit'], ['Suomiklassikot', 'Eppu, Popeda, Kaija Koo, Loiri…', 'suomiklassikot'],
+  ['Finnish Rock & Metal', 'Nightwish, HIM, The Rasmus…', 'finrock']];
 const SHOW_CARDS = [['Anime Openings', 'Name the anime from its opening', 'anime'], ["Kids' Shows", 'Cartoon and kids TV intros', 'kids'], ['TV Series Themes', 'Breaking Bad, Friends, Game of Thrones…', 'tv'], ['Video Game Music', 'Mario, Zelda, Minecraft, Halo…', 'games'],
   ['Movie Themes', 'Star Wars, Harry Potter, Rocky…', 'movies'], ['Disney Songs', 'Name the movie from the song', 'disney'],
   ["JoJo's Bizarre Adventure", 'Name the part from its opening', 'jojo']];
@@ -725,6 +771,7 @@ const showArt = key => Promise.all(SHOWS[key].slice(0, 4).map(([show, q, c]) => 
 const showCard = ([name, desc, key]) => card(name, desc, () => startGame(mkCfg({ shows:key, label:name, from:'home' })), false, showArt(key));
 $('shows').append(...SHOW_CARDS.map(showCard));
 $('party').append(...PARTY_CARDS.map(showCard));
+$('fiQuick').prepend(...FI_CARDS.map(showCard));
 $('fiQuick').append(...FI_QUICK.map(([name, desc, cfg]) => card(name, desc, () => startGame(mkCfg({ ...cfg, label:name, from:'home' })), false, coverArt(cfg.terms[1], 'FI'))));
 $('fiArtists').append(...FI_ARTISTS.map(a => card(a, 'Artisti', () => startGame(mkCfg({ artist:a, label:a, country:'FI', from:'home' })), true, artistPic(a).then(u => [u]))));
 
@@ -913,10 +960,10 @@ function next() {
   $('art').innerHTML = $('miniArt').innerHTML = EQ;
   $('gbg').style.backgroundImage = '';
   $('gLabel').textContent = (G.cfg.daily ? 'DAILY CHALLENGE · ' : 'PLAYING · ') + G.cfg.label.toUpperCase();
-  const [noun, question, hint] = SHOW_TEXT[G.cfg.shows] || ['Song', 'Unknown artist · listen and guess', 'Search for the title…'];
+  const [noun, question, hint] = SHOW_TEXT[G.cfg.shows] || ['Song', 'Unknown artist · listen and guess', 'Know it? Search for the title…'];
   $('songTitle').textContent = noun + ' ' + G.round;
   $('songArtist').textContent = question;
-  $('guess').placeholder = 'Know it? ' + hint;
+  $('guess').placeholder = hint;
   $('guess').value = ''; $('result').replaceChildren();
   $('typeBox').hidden = G.cfg.mode !== 'type';
   $('nextBtn').hidden = true; $('skip2').hidden = $('giveup').hidden = false;
