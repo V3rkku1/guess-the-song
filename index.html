@@ -454,14 +454,14 @@ const SHOWS = {
     ["The Jungle Book","The Bare Necessities Phil Harris"],["Frozen II","Into the Unknown Idina Menzel"],["The Princess and the Frog","Almost There Anika Noni Rose"],
     ["Wish","This Wish Ariana DeBose"],["Hannah Montana: The Movie","The Climb Miley Cyrus"],["High School Musical","Breaking Free Zac Efron"],
     ["Camp Rock","This Is Me Demi Lovato"],["Frozen","Let It Go Idina Menzel"]],
+  // openings only; you name the part. Several openings share a part, so answers repeat on purpose.
   jojo: [
-    ["JoJo ~Sono Chi no Sadame~","ジョジョ その血の運命 富永TOMMY弘明"],["Bloody Stream","BLOODY STREAM Coda"],["Stand Proud","STAND PROUD 橋本仁"],
-    ["Sono Chi no Kioku ~end of THE WORLD~","ジョジョ その血の記憶 end of THE WORLD"],["Crazy Noisy Bizarre Town","Crazy Noisy Bizarre Town THE DU"],["Chase","chase batta"],
-    ["Great Days","Great Days 青木カレン ハセガワダイスケ"],["Fighting Gold","Fighting Gold Coda"],["Traitor's Requiem","裏切り者のレクイエム ハセガワダイスケ"],
-    ["STONE OCEAN","STONE OCEAN ichigo 岸田教団"],["Heaven's Falling Down","Heaven's falling down sana"],["Il Vento d'Oro (Giorno's Theme)","il vento d'oro 菅野祐悟"],
-    ["Awake (Pillar Men Theme)","Awake 岩崎琢"],["Roundabout","Roundabout Yes"],["Walk Like an Egyptian","Walk Like an Egyptian The Bangles"],
-    ["I Want You","I Want You Savage Garden"],["Freek'n You","Freek'n You Jodeci"],["Last Train Home","Last Train Home Pat Metheny Group"],
-    ["Modern Crusaders","Modern Crusaders Enigma"],["Distant Dreamer","Distant Dreamer Duffy","US"]],
+    ["Phantom Blood (Part 1)","ジョジョ その血の運命 富永TOMMY弘明"],["Battle Tendency (Part 2)","BLOODY STREAM Coda"],
+    ["Stardust Crusaders (Part 3)","STAND PROUD 橋本仁"],["Stardust Crusaders (Part 3)","ジョジョ その血の記憶 end of THE WORLD"],
+    ["Diamond is Unbreakable (Part 4)","Crazy Noisy Bizarre Town THE DU"],["Diamond is Unbreakable (Part 4)","chase batta"],
+    ["Diamond is Unbreakable (Part 4)","Great Days 青木カレン ハセガワダイスケ"],["Golden Wind (Part 5)","Fighting Gold Coda"],
+    ["Golden Wind (Part 5)","裏切り者のレクイエム ハセガワダイスケ"],["Stone Ocean (Part 6)","STONE OCEAN ichigo 岸田教団"],
+    ["Stone Ocean (Part 6)","Heaven's falling down sana"]],
 };
 const SHOW_COUNTRY = { jojo:'JP' }; // store to search per category (entry's 3rd item overrides)
 // [title prefix, question, placeholder] per category
@@ -469,11 +469,11 @@ const SHOW_TEXT = {
   anime:['Show', 'Which anime is this opening from?', 'Type the anime…'], kids:['Show', 'Which kids show is this intro from?', 'Type the show…'],
   tv:['Show', 'Which series is this intro from?', 'Type the show name…'], games:['Game', 'Which game is this music from?', 'Type the game…'],
   movies:['Movie', 'Which movie is this from?', 'Type the movie…'], disney:['Movie', 'Which movie is this song from?', 'Type the movie…'],
-  jojo:['Song', 'Which JoJo opening or ending is this?', 'Type the song…'],
+  jojo:['Opening', 'Which JoJo part is this opening from?', 'Type the part, e.g. Golden Wind…'],
 };
 const SHOW_CARDS = [['Anime Openings', 'Name the anime from its opening', 'anime'], ["Kids' Shows", 'Cartoon and kids TV intros', 'kids'], ['TV Series Themes', 'Breaking Bad, Friends, Game of Thrones…', 'tv'], ['Video Game Music', 'Mario, Zelda, Minecraft, Halo…', 'games'],
   ['Movie Themes', 'Star Wars, Harry Potter, Rocky…', 'movies'], ['Disney Songs', 'Name the movie from the song', 'disney'],
-  ["JoJo's Bizarre Adventure", 'Openings and endings — name the song', 'jojo']];
+  ["JoJo's Bizarre Adventure", 'Name the part from its opening', 'jojo']];
 const ARTISTS = ['Taylor Swift','Queen','Drake','The Weeknd','Eminem','ABBA','Michael Jackson','Billie Eilish','Coldplay','Ed Sheeran','Rihanna','Metallica','Beyoncé','Bruno Mars','Dua Lipa','Arctic Monkeys','Kendrick Lamar','Lady Gaga','Bad Bunny','BTS'];
 const ICONS = {
   home:'M12 3 2 12h3v9h6v-6h2v6h6v-9h3z',
